@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>{{ $meta->title }}</title>
 
-    @assets(['theme:assets/vendor/uikit/css/uikit.almost-flat.css'], 'default.theme', 'cache:assets', 3600)
+    @scripts(['theme:assets/vendor/jquery.js','theme:assets/vendor/uikit/css/uikit.almost-flat.css', 'theme:assets/vendor/uikit/js/uikit.min.js'])
     @trigger("site.header")
 </head>
     <body>

@@ -24,7 +24,7 @@ $site["cockpit"] = $cockpit;
 foreach ([
     'root'     => __DIR__,
     'content'  => __DIR__.'/content',
-    'snippets' => __DIR__.'/storage/snippets',
+    'snippets' => __DIR__.'/snippets',
     'cache'    => __DIR__.'/storage/cache',
     'tmp'      => __DIR__.'/storage/cache/tmp',
     'lib'      => __DIR__.'/lib',
