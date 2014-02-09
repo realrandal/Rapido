@@ -52,6 +52,11 @@ $site->service('memory', function() use($site) {
 // set cache path
 $site("cache")->setCachePath("cache:tmp"); 
 
+// bootstrap theme
+if($themebootstrap = $site->path("theme:bootstrap.php")) {
+    include($themebootstrap);
+}
+
 // load extension modules
 $site->loadModules(__DIR__.'/lib/modules');
 
