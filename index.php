@@ -17,8 +17,7 @@ date_default_timezone_set($config['timezone']);
 
 $site = new LimeExtra\App($config);
 
-$site["config"]  = $config;
-$site["cockpit"] = $cockpit;
+$site["config"] = $config;
 
 // register global paths
 foreach ([

@@ -1,6 +1,6 @@
 ===
 
-    title: Rapido About page
+    title: Rapida About page
 
 ===
 

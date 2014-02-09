@@ -21,6 +21,6 @@ return [
     "theme"        => "default",
 
     "page.meta"    => [
-        "title" => $svrname // default page title
+        "title" => "Rapida" // default page title
     ], 
 ];
