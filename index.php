@@ -25,6 +25,7 @@ foreach ([
     'root'     => __DIR__,
     'content'  => __DIR__.'/content',
     'snippets' => __DIR__.'/snippets',
+    'data'     => __DIR__.'/storage/data',
     'cache'    => __DIR__.'/storage/cache',
     'tmp'      => __DIR__.'/storage/cache/tmp',
     'lib'      => __DIR__.'/lib',
@@ -35,6 +36,17 @@ foreach ([
     'theme'    => __DIR__."/themes/{$config['theme']}",
 ] as $key => $path) { $site->path($key, $path); }
 
+// nosql storage
+$site->service('data', function() use($site) {
+    $client = new MongoLite\Client($site->path('data:'));
+    return $client;
+});
+
+// key-value storage
+$site->service('memory', function() use($site) {
+    $client = new RedisLite(sprintf("%s/site.memory.sqlite", $site->path('data:')));
+    return $client;
+});
 
 // set cache path
 $site("cache")->setCachePath("cache:tmp"); 
