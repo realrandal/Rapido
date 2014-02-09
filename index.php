@@ -9,7 +9,7 @@ $config = include(__DIR__.'/config.php');
 if(file_exists(__DIR__."/{$config['admin']}/bootstrap.php")) {
     require_once(__DIR__."/{$config['admin']}/bootstrap.php");
 } else {
-    echo "Please install Cockpit first!";
+    echo "<center>Please install Cockpit first to the folder /{$config['admin']}!</center>";
     exit;
 }
 
