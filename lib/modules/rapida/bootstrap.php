@@ -2,7 +2,7 @@
 
 $site = $this;
 
-$this->module("core")->extend([
+$this->module("rapida")->extend([
 
     "render_page" => function($route) use($site) {
 
@@ -50,10 +50,15 @@ $this->module("core")->extend([
 
                 //add scripts defined in meta
                 $site->on("site.header", function() use($site, $meta){
-                    
                     if(count($meta["scripts"])) {
                         echo $site->assets($meta["scripts"], $site['config/version']);
                     }
+
+                    $site->block("site.header");
+                });
+
+                $site->on("site.footer", function() use($site, $meta){
+                    $site->block("site.footer");
                 });
             }
         }

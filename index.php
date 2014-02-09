@@ -28,12 +28,14 @@ foreach ([
     'data'     => __DIR__.'/storage/data',
     'cache'    => __DIR__.'/storage/cache',
     'tmp'      => __DIR__.'/storage/cache/tmp',
+    'media'    => __DIR__.'/storage/media',
     'lib'      => __DIR__.'/lib',
     'assets'   => __DIR__.'/lib/assets',
     'modules'  => __DIR__.'/lib/modules',
     'vendor'   => __DIR__.'/lib/vendor',
     'themes'   => __DIR__.'/themes',
     'theme'    => __DIR__."/themes/{$config['theme']}",
+    'cockpit'  => __DIR__."/{$config['admin']}",
 ] as $key => $path) { $site->path($key, $path); }
 
 // nosql storage
@@ -56,7 +58,7 @@ $site->loadModules(__DIR__.'/lib/modules');
 
 // route to content mapping
 $site->bind("/*", function() use($site) {
-    return $site->module("core")->render_page($site["route"]);
+    return $site->module("rapida")->render_page($site["route"]);
 });
 
 // handle 404, 500
