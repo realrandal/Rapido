@@ -12,10 +12,10 @@
 /admin/storage/cache/thumbs/*.jpg
 /admin/storage/cache/thumbs/*.png
 /admin/storage/cache/thumbs/*.gif
-/admin/storage/cache/tmp2/*
+/admin/storage/cache/tmp/*
 /admin/storage/data/*.sqlite
 /admin/storage/uploads/*
-/admin/custom2/*
+/admin/custom/*
 
 /storage/cache/assets/*.js
 /storage/cache/assets/*.css
