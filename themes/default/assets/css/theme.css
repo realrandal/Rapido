@@ -1,0 +1,33 @@
+h1,h2,h3,h4,h5,h6 {
+    font-weight: bold;
+}
+
+
+.site-nav-top.uk-subnav a {
+    color: #000;
+    font-size: 12px;
+    font-weight: bold;
+}
+.site-nav-top.uk-subnav a:hover {
+    color: red;
+    text-decoration: none;
+}
+
+.site-nav-main .uk-navbar-brand {
+    font-weight: bold;
+    background-color: #fff;
+}
+
+.site-nav-main {
+    margin-bottom: 60px;
+}
+
+.site-nav-main .uk-navbar-nav > li > a {
+     
+}
+
+.site-nav-main .uk-navbar-nav > li.uk-active > a {
+    font-weight: bold;
+    background: #fff;
+    font-weight: bold; 
+}

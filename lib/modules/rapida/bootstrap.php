@@ -38,6 +38,7 @@ $this->module("rapida")->extend([
             
             $meta = array_merge([
                 "title"    => $site["name"],
+                "route"    => $site["route"],
                 "layout"   => "theme:theme.php",
                 "base_url" => $site["base_url"],
                 "scripts"  => []
@@ -127,7 +128,14 @@ $site->renderer()->extend(function($content){
         $content = implode("\n", $lines);
     }
 
+    // parse markdown
+    if(strpos($content, '<markdown>')!==false) {
+        $content = preg_replace_callback("/<markdown>(.*?)<\/markdown>/smU", function($match){
+            return \Parsedown::instance()->parse($match[1]);
+        }, $content);
+    }
 
+    // snippets
     $content = preg_replace('/(\s*)@snippet\([",\'](.+?)[",\']\)/', '$1<?php echo $app->view("snippets:$2.php", ["meta" => isset($meta) ? $meta:null]); ?>', $content);
 
     // extend lexy parser with cockpit functions
