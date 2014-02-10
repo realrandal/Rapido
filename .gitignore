@@ -12,7 +12,7 @@
 /admin/storage/cache/thumbs/*.jpg
 /admin/storage/cache/thumbs/*.png
 /admin/storage/cache/thumbs/*.gif
-/admin/storage/cache/tmp/*
+/admin/storage/cache/tmp2/*
 /admin/storage/data/*.sqlite
 /admin/storage/uploads/*
 /admin/custom2/*
