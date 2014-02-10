@@ -1,7 +1,5 @@
 <?php
 
-opcache_reset();
-
 global $site;
 
 $config = include(__DIR__.'/config.php');
