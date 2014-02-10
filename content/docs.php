@@ -8,7 +8,7 @@
 <div style="margin-bottom:100px;">
 
     <h1>Documentation</h1>
-    
+
     <p class="uk-text-large">
         Rapida is a flexible and crazy fast CMS implementation built on top of Cockpit
     </p>
@@ -19,7 +19,7 @@
 
 
 <div class="uk-grid uk-margin" data-uk-margin>
-    
+
     <div class="uk-width-medium-1-4">
         <ul class="uk-nav">
             <li class="uk-nav-header">Further information</li>
@@ -29,7 +29,7 @@
     </div>
 
     <div class="uk-width-medium-3-4">
-        
+
 
 <markdown>
 
@@ -45,7 +45,7 @@ To run Cockpit you need PHP 5.4+ to be running on your server. If you're running
 2. Upload the files to your server.
 3. That's it. Tweak the .htaccess file if required.
 
-You can override the default Rapida settings (and add your own custom settings) by editing config.php in the root Rapida directory. 
+You can override the default Rapida settings (and add your own custom settings) by editing config.php in the root Rapida directory.
 The config.php file lists all of the settings and their defaults. To override a setting simply uncomment it in config.php and set your custom value.
 
 
@@ -89,13 +89,13 @@ If a file cannot be found, the file themes/:theme/404.php will be shown.
 ### View File Markup
 
 View files are using the Lexy syntax. They can also contain regular HTML or PHP. At the top of text files you can place a meta block and specify certain attributes of the page. For example:
-    
+
     ===
     // modify title or layout, define scripts to load
     title: Welcome
     layout: otherlayout.php
     scripts: ["path/to/style.css", "script.js"]
-    
+
     // custom data
     key1: value1
     key2: value2
@@ -107,9 +107,9 @@ These values will be contained in the  <code>$meta</code> variable in themes/vie
 
 ### Themeing
 
-You can create themes for your Rapida installation and in the "themes" folder. Check out the default theme for an example of a theme. Rapida uses Lexy for it's templating engine (inspired by Blade). You can select your theme by setting the <code>theme</code> variable in config.php to your theme folder.
+You can create themes for your Rapida installation in the "themes" folder. Check out the default theme for an example of a theme. Rapida uses Lexy for it's templating engine (inspired by Blade). You can select your theme by setting the <code>theme</code> variable in config.php to your theme folder.
 
-All themes must include an **theme.php** file to define the HTML structure of the theme and a **404.php** / **500.php** file for the error layouts. Below are the Lexy variables/methods that are available to use in your theme:
+All themes must include a **theme.php** file to define the HTML structure of the theme, also a **404.php** and **500.php** file for the error layouts. Below are the Lexy variables/methods that are available to use in your theme:
 
 - _$meta_ - access: $meta->title, $meta->route, $meta->base_url
 - _@base_('/url/to/file/based/to/basefolder')

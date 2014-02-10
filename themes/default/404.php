@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Document not found</title>
-    @assets(['theme:assets/vendor/uikit/css/uikit.almost-flat.css'], 'default.theme', 'cache:assets', 3600)
+    @scripts(['theme:assets/css/theme.css'])
 </head>
 <body>
-    
+
     <div class="uk-container uk-container-center uk-text-center">
         <h1>404</h1>
 

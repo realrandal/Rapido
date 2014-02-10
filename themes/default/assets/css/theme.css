@@ -1,3 +1,6 @@
+@import url(../vendor/uikit/css/uikit.min.css);
+
+
 h1,h2,h3,h4,h5,h6 {
     font-weight: bold;
 }
@@ -23,11 +26,11 @@ h1,h2,h3,h4,h5,h6 {
 }
 
 .site-nav-main .uk-navbar-nav > li > a {
-     
+
 }
 
 .site-nav-main .uk-navbar-nav > li.uk-active > a {
     font-weight: bold;
     background: #fff;
-    font-weight: bold; 
+    font-weight: bold;
 }

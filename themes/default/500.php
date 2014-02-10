@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Server error</title>
-    @assets(['theme:assets/vendor/uikit/css/uikit.almost-flat.css'], 'default.theme', 'cache:assets', 3600)
+    @scripts(['theme:assets/css/theme.css'])
 </head>
 <body>
 
