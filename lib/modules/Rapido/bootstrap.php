@@ -29,7 +29,7 @@ $site->on("site.footer", function() use($site){
 
 // API
 
-$this->module("rapida")->extend([
+$this->module("rapido")->extend([
 
     "render_page" => function($route) use($site) {
 

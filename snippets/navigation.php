@@ -8,7 +8,7 @@
 
 <nav class="site-nav-main uk-navbar">
 
-    <a class="uk-navbar-brand" href="@route('/')"><i class="uk-icon-bolt"></i> Rapida</a>
+    <a class="uk-navbar-brand" href="@route('/')"><i class="uk-icon-bolt"></i> Rapido</a>
 
     <div class="uk-navbar-flip">
         <ul class="uk-navbar-nav">

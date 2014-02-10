@@ -1,6 +1,6 @@
 ===
 
-    title: Rapida Docs
+    title: Rapido Docs
 
 ===
 
@@ -9,7 +9,7 @@
     <h1>Documentation</h1>
 
     <p class="uk-text-large">
-        Rapida is a flexible and crazy fast CMS implementation built on top of Cockpit
+        Rapido is a flexible and crazy fast CMS implementation built on top of Cockpit
     </p>
 
 
@@ -22,7 +22,7 @@
     <div class="uk-width-medium-1-4">
         <ul class="uk-nav">
             <li class="uk-nav-header">Further information</li>
-            <li><a href="https://github.com/aheinze/rapida">Rapida on Github</a></li>
+            <li><a href="https://github.com/aheinze/Rapido">Rapido on Github</a></li>
             <li><a href="http://getcockpit.com">Learn about Cockpit</a></li>
         </ul>
     </div>
@@ -40,17 +40,17 @@ To run Cockpit you need PHP 5.4+ to be running on your server. If you're running
 
 ### Installation
 
-1. First download and extract the latest version of Rapida.
+1. First download and extract the latest version of Rapido.
 2. Upload the files to your server.
 3. That's it. Tweak the .htaccess file if required.
 
-You can override the default Rapida settings (and add your own custom settings) by editing config.php in the root Rapida directory.
+You can override the default Rapido settings (and add your own custom settings) by editing config.php in the root Rapido directory.
 The config.php file lists all of the settings and their defaults. To override a setting simply uncomment it in config.php and set your custom value.
 
 
 ### Creating Content
 
-Rapida is a flat file CMS, this means there is no database to deal with. You simply create .php files in the "content" folder and that becomes a page.
+Rapido is a flat file CMS, this means there is no database to deal with. You simply create .php files in the "content" folder and that becomes a page.
 
 If you created folder within the content folder (e.g. content/sub) and put an index.php inside it, you can access that folder at the URL http://yousite.com/sub. If you want another page within the sub folder, simply create a text file with the corresponding name (e.g. content/sub/page.php) and will be able to access it from the URL http://yousite.com/sub/page.
 
@@ -106,7 +106,7 @@ These values will be contained in the  <code>$meta</code> variable in themes/vie
 
 ### Themeing
 
-You can create themes for your Rapida installation in the "themes" folder. Check out the default theme for an example of a theme. Rapida uses Lexy for it's templating engine (inspired by Blade). You can select your theme by setting the <code>theme</code> variable in config.php to your theme folder.
+You can create themes for your Rapido installation in the "themes" folder. Check out the default theme for an example of a theme. Rapido uses Lexy for it's templating engine (inspired by Blade). You can select your theme by setting the <code>theme</code> variable in config.php to your theme folder.
 
 All themes must include a **theme.php** file to define the HTML structure of the theme, also a **404.php** and **500.php** file for the error layouts. Below are the Lexy variables/methods that are available to use in your theme:
 

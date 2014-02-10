@@ -3,7 +3,7 @@
 
 return [
 
-    "app.name"          => "Rapida",
-    "session.name"      => "rapidasession",
-    "sec-key"           => "c3b40c4c-db44-s5h7-a814-b4931a15e5e1",
+    "app.name"          => "Rapido",
+    "session.name"      => "rapidosession",
+    "sec-key"           => "c5a40c4a-fb64-s5u7-a813-a4431g15e5e1",
 ];

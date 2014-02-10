@@ -1,6 +1,6 @@
 ===
 
-    title: Rapida About page
+    title: Rapido About page
 
 ===
 
@@ -10,7 +10,7 @@
     <h1>About</h1>
     
     <p class="uk-text-large">
-        Rapida is a flexible and crazy fast CMS implementation built on top of Cockpit
+        Rapido is a flexible and crazy fast CMS implementation built on top of Cockpit
     </p>
 
     <p>

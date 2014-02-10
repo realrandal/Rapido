@@ -4,7 +4,7 @@
     <h1>Congrats!</h1>
 
     <p class="uk-text-large">
-        You've installed Rapida successfully!
+        You've installed Rapido successfully!
     </p>
 
     <p>

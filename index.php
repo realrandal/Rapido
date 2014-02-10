@@ -56,7 +56,7 @@ $site->loadModules(__DIR__.'/lib/modules');
 
 // route to content mapping
 $site->bind("/*", function() use($site) {
-    return $site->module("rapida")->render_page($site["route"]);
+    return $site->module("rapido")->render_page($site["route"]);
 });
 
 // handle 404, 500
