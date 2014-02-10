@@ -1,17 +1,13 @@
 <?php
 
+opcache_reset();
+
 global $site;
 
 $config = include(__DIR__.'/config.php');
 
 // embed cockpit
-
-if(file_exists(__DIR__."/{$config['admin']}/bootstrap.php")) {
-    require_once(__DIR__."/{$config['admin']}/bootstrap.php");
-} else {
-    echo "<center>Please install Cockpit first to the folder /{$config['admin']}!</center>";
-    exit;
-}
+require_once(__DIR__."/{$config['admin']}/bootstrap.php");
 
 date_default_timezone_set($config['timezone']);
 
@@ -21,7 +17,7 @@ $site["config"] = $config;
 
 // register global paths
 foreach ([
-    'root'     => __DIR__,
+    'site'     => __DIR__,
     'content'  => __DIR__.'/content',
     'snippets' => __DIR__.'/snippets',
     'data'     => __DIR__.'/storage/data',
@@ -38,9 +34,9 @@ foreach ([
 ] as $key => $path) { $site->path($key, $path); }
 
 // nosql storage
-$site->service('data', function() use($site) {
+$site->service('database', function() use($site) {
     $client = new MongoLite\Client($site->path('data:'));
-    return $client;
+    return $client->database;
 });
 
 // key-value storage
@@ -50,7 +46,7 @@ $site->service('memory', function() use($site) {
 });
 
 // set cache path
-$site("cache")->setCachePath("cache:tmp"); 
+$site("cache")->setCachePath("cache:tmp");
 
 // bootstrap theme
 if($themebootstrap = $site->path("theme:bootstrap.php")) {

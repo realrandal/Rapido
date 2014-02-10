@@ -2,6 +2,33 @@
 
 $site = $this;
 
+// Events
+
+$site->on("site.init", function() use($site){
+    $site->viewvars["meta"] = (object) $site["config/site.meta"];
+
+    $site->viewvars["meta"]->route = $site["route"];
+    $site->viewvars["meta"]->site  = $site;
+}, 100);
+
+$site->on("site.header", function() use($site){
+
+    echo '<base href="'.$site->baseUrl('/').'">';
+
+    //add scripts defined in meta
+    if(count($site->viewvars["meta"]->scripts)) {
+        echo $site->assets($site->viewvars["meta"]->scripts, $site['config/version']);
+    }
+
+    $site->block("site.header");
+});
+
+$site->on("site.footer", function() use($site){
+    $site->block("site.footer");
+});
+
+// API
+
 $this->module("rapida")->extend([
 
     "render_page" => function($route) use($site) {
@@ -18,7 +45,7 @@ $this->module("rapida")->extend([
         }
 
         if ($path && is_dir($path)) {
-        
+
             if(file_exists("{$path}/index.php")) {
                 $view = "{$path}/index.php";
             }
@@ -30,47 +57,26 @@ $this->module("rapida")->extend([
             $view =  $site->path("content:{$path}");
         }
 
-        // meta
-
-        $meta = [];
-
         if($view) {
-            
-            $meta = array_merge([
-                "title"    => $site["name"],
-                "route"    => $site["route"],
-                "layout"   => "theme:theme.php",
-                "base_url" => $site["base_url"],
-                "scripts"  => []
-            ], $site["config/page.meta"], $this->read_file_meta(file_get_contents($view)));
+
+            $sitemeta = $site->viewvars["meta"];
+            $meta     = $this->read_file_meta(file_get_contents($view));
+
+            foreach($meta as $key => $val) {
+                $sitemeta->{$key} = $val;
+            }
 
             // set layout
-            $view .= $meta["layout"] && !$site->req_is("ajax") ? " with {$meta['layout']}" : false;
+            $view .= $sitemeta->layout && !$site->req_is("ajax") ? " with {$sitemeta->layout}" : false;
 
-            if(!$site->req_is("ajax")) {
-
-                //add scripts defined in meta
-                $site->on("site.header", function() use($site, $meta){
-                    if(count($meta["scripts"])) {
-                        echo $site->assets($meta["scripts"], $site['config/version']);
-                    }
-
-                    $site->block("site.header");
-                });
-
-                $site->on("site.footer", function() use($site, $meta){
-                    $site->block("site.footer");
-                });
-            }
+            return $site->view($view);
         }
 
-        $meta = (object) $meta;
-
-        return $view ? $site->view($view, ["meta" => $meta]) : false;
+        return false;
     },
 
-    "read_file_meta" => function($content) {
-        
+    "read_file_meta" => function($content) use ($site) {
+
         global $site;
 
         $meta  = [];
@@ -78,7 +84,7 @@ $this->module("rapida")->extend([
 
         if(trim($lines[0])=='===') {
             for($i=1;$i<count($lines);$i++) {
-                
+
                 $line = trim($lines[$i]);
 
                 if(!strlen($line)) continue;
@@ -87,14 +93,14 @@ $this->module("rapida")->extend([
                 $parts = explode(":", $line, 2);
 
                 if(count($parts)==2) {
-                    
+
                     $key   = trim($parts[0]);
                     $value = trim($parts[1]);
 
                     $meta[$key] = $value;
-                    
+
                     $json = json_decode($value);
-                    
+
                     if(!is_null($json)) {
                         $meta[$key] = $json;
                     }
@@ -107,6 +113,7 @@ $this->module("rapida")->extend([
 
 ]);
 
+// Extend view renderer
 
 $site->renderer()->extend(function($content){
 
@@ -124,7 +131,7 @@ $site->renderer()->extend(function($content){
             array_shift($lines);
             $end = $end - 1;
         }
-        
+
         $content = implode("\n", $lines);
     }
 
@@ -136,11 +143,11 @@ $site->renderer()->extend(function($content){
     }
 
     // snippets
-    $content = preg_replace('/(\s*)@snippet\([",\'](.+?)[",\']\)/', '$1<?php echo $app->view("snippets:$2.php", ["meta" => isset($meta) ? $meta:null]); ?>', $content);
+    $content = preg_replace('/(\s*)@snippet\([",\'](.+?)[",\']\)/', '$1<?php echo $app->view("snippets:$2.php"); ?>', $content);
 
     // extend lexy parser with cockpit functions
     $content = preg_replace('/(\s*)@thumbnail\((.+?)\)/', '$1<?php cockpit("mediamanager")->thumbnail($2); ?>', $content);
     $content = preg_replace('/(\s*)@form\((.+?)\)/', '$1<?php cockpit("forms")->form($2); ?>', $content);
-    $content = preg_replace('/(\s*)@region\((.+?)\)/', '$1<?php cockpit("regions")->render($2); ?>', $content);
+    $content = preg_replace('/(\s*)@region\((.+?)\)/', '$1<?php echo cockpit("regions")->render($2); ?>', $content);
     return $content;
 });

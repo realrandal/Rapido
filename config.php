@@ -12,15 +12,18 @@ return [
     "base_url"     => $base,
     "base_route"   => $base,
     "docs_root"    => $docsroot,
-    
+
     // edit here:
     "version"      => "1.0.0",
-    "admin"        => "admin", // cockpit folder
+    "admin"        => "admin", // cockpit folder name
     "autoload"     => new ArrayObject([__DIR__.'/lib/vendor']),
     "timezone"     => "UTC",
     "theme"        => "default",
 
-    "page.meta"    => [
-        "title" => "Rapida" // default page title
-    ], 
+    // default site meta
+    "site.meta"    => [
+        "title"    => "Rapida", // default page title
+        "layout"   => "theme:theme.php",
+        "scripts"  => []
+    ],
 ];

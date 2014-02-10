@@ -4,7 +4,6 @@
 
 ===
 
-
 <div style="margin-bottom:100px;">
 
     <h1>Documentation</h1>
@@ -111,7 +110,8 @@ You can create themes for your Rapida installation in the "themes" folder. Check
 
 All themes must include a **theme.php** file to define the HTML structure of the theme, also a **404.php** and **500.php** file for the error layouts. Below are the Lexy variables/methods that are available to use in your theme:
 
-- _$meta_ - access: $meta->title, $meta->route, $meta->base_url
+- **$base_url** - access: base url
+- **$meta** - access: $meta->title, $meta->layout, $meta->scripts, $meta->route
 - _@base_('/url/to/file/based/to/basefolder')
 - _@route_('/page/about')
 - _@snippet_('snippetname')
