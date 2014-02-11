@@ -1,7 +1,7 @@
 
 <div class="uk-clearfix">
     <ul class="uk-float-right site-nav-top  uk-subnav uk-subnav-line">
-        <li><a href="https://github.com/aheinze/rapida"><i class="uk-icon-github"></i> Source</a></li>
+        <li><a href="https://github.com/aheinze/Rapido"><i class="uk-icon-github"></i> Source</a></li>
         <li><a href="http://getcockpit.com">Cockpit</a></li>
     </ul>
 </div>
