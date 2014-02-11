@@ -62,14 +62,42 @@ $this->module("rapido")->extend([
             $sitemeta = $site->viewvars["meta"];
             $meta     = $this->read_file_meta(file_get_contents($view));
 
+            $params   = [];
+
             foreach($meta as $key => $val) {
                 $sitemeta->{$key} = $val;
+            }
+
+            // auto regions
+            if(isset($sitemeta->regions)) {
+
+                $regions = new \stdClass;
+
+                foreach ((array) $sitemeta->regions as $region) {
+                    $name = str_replace(['-',' ', '.'], '_', $region);
+                    $regions->{$name} = cockpit("regions")->render($region);
+                }
+
+                $params["regions"] = $regions;
+            }
+
+            // auto galleries
+            if(isset($sitemeta->galleries)) {
+
+                $galleries = new \stdClass;
+
+                foreach ((array) $sitemeta->galleries as $gallery) {
+                    $name = str_replace(['-',' ', '.'], '_', $gallery);
+                    $galleries->{$name} = cockpit("galleries")->gallery($gallery);
+                }
+
+                $params["galleries"] = $galleries;
             }
 
             // set layout
             $view .= $sitemeta->layout && !$site->req_is("ajax") ? " with {$sitemeta->layout}" : false;
 
-            return $site->view($view);
+            return $site->view($view, $params);
         }
 
         return false;
