@@ -118,13 +118,13 @@ All themes must include a **theme.php** file to define the HTML structure of the
 - _@render_('/path/to/view')
 - _@thumbnail_('/path/to/image.jpg', 100, 100)
 - _@region_('regionname') - region managed by Cockpit
-- _@form_('formname') - unsing Cockpit's form api
+- _@form_('formname') - using Cockpit's form api
 
 <hr/>
 
 ### Contribute
 
-Help make Cockpit better by checking out the GitHub repoistory and submitting pull requests. If you find a bug please report it on the issues page.
+Help make Rapido better by checking out the GitHub repoistory and submitting pull requests. If you find a bug please report it on the issues page.
 </markdown>
     </div>
 </div>
