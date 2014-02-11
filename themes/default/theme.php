@@ -9,18 +9,25 @@
     @scripts(['theme:assets/vendor/jquery.js', 'theme:assets/vendor/uikit/js/uikit.min.js'])
     @scripts(['theme:assets/css/theme.css', 'theme:assets/js/theme.js'])
     @trigger("site.header")
-    
+
 </head>
     <body>
 
-        <div class="uk-container uk-container-center uk-margin-top">
-
-            <div class="uk-margin">
+        <div class="site-header">
+            <div class="uk-container uk-container-center">
                 @snippet("navigation")
             </div>
+        </div>
 
-            <div class="uk-margin">
+        <div class="site-main">
+            <div class="uk-container uk-container-center">
                 {{ $content_for_layout }}
+            </div>
+        </div>
+
+        <div class="site-footer">
+            <div class="uk-container uk-container-center">
+                @snippet("footer")
             </div>
         </div>
 

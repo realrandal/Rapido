@@ -8,8 +8,8 @@
 <div class="uk-text-center">
 
     <h1>About</h1>
-    
-    <p class="uk-text-large">
+
+    <p class="uk-text-large uk-text-muted">
         Rapido is a flexible and crazy fast CMS implementation built on top of Cockpit
     </p>
 

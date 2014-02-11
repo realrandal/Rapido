@@ -22,7 +22,7 @@ return [
 
     // default site meta
     "site.meta"    => [
-        "title"    => "Rapida", // default page title
+        "title"    => "Rapido", // default page title
         "layout"   => "theme:theme.php",
         "scripts"  => []
     ],
