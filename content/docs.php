@@ -34,7 +34,7 @@
 
 ### Requirements
 
-To run Cockpit you need PHP 5.4+ to be running on your server. If you're running Apache you will also require mod_rewrite to be enabled.
+To run Rapido you need PHP 5.4+ to be running on your server. If you're running Apache you will also require mod_rewrite to be enabled.
 
 <hr/>
 
@@ -50,7 +50,7 @@ The config.php file lists all of the settings and their defaults. To override a 
 
 ### Creating Content
 
-Rapido is a flat file CMS, this means there is no database to deal with. You simply create .php files in the "content" folder and that becomes a page.
+Rapido is a flat file CMS, this means there is no database server to deal with. You simply create .php files in the "content" folder and that becomes a page.
 
 If you created folder within the content folder (e.g. content/sub) and put an index.php inside it, you can access that folder at the URL http://yousite.com/sub. If you want another page within the sub folder, simply create a text file with the corresponding name (e.g. content/sub/page.php) and will be able to access it from the URL http://yousite.com/sub/page.
 

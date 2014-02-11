@@ -31,38 +31,16 @@ $site->on("site.footer", function() use($site){
 
 $this->module("rapido")->extend([
 
-    "render_page" => function($route) use($site) {
+    "render_page" => function($view, $params = []) use($site) {
 
-        $view = false;
+        if(!$view) return false;
 
-        $path = rtrim(str_replace('../', '', $route), '/');
-        $path = strlen($path) ? $path:'/';
-        $path = rtrim($site->path("content:{$path}"), '/');
+        // parse page meta data
 
-        // prevent direct access to files in the content folder
-        if($path && is_file($path)) {
-            return false;
-        }
+        $sitemeta = $site->viewvars["meta"];
+        $meta     = $this->read_file_meta(file_get_contents($view));
 
-        if ($path && is_dir($path)) {
-
-            if(file_exists("{$path}/index.php")) {
-                $view = "{$path}/index.php";
-            }
-
-        } else {
-            $tmp = explode('/', $route);
-            $tmp[count($tmp)-1] .= ".php";
-            $path = implode($tmp);
-            $view =  $site->path("content:{$path}");
-        }
-
-        if($view) {
-
-            $sitemeta = $site->viewvars["meta"];
-            $meta     = $this->read_file_meta(file_get_contents($view));
-
-            $params   = [];
+        if(count($meta)) {
 
             foreach($meta as $key => $val) {
                 $sitemeta->{$key} = $val;
@@ -93,14 +71,12 @@ $this->module("rapido")->extend([
 
                 $params["galleries"] = $galleries;
             }
-
-            // set layout
-            $view .= $sitemeta->layout && !$site->req_is("ajax") ? " with {$sitemeta->layout}" : false;
-
-            return $site->view($view, $params);
         }
 
-        return false;
+        // set layout
+        $view .= $sitemeta->layout && !$site->req_is("ajax") ? " with {$sitemeta->layout}" : false;
+
+        return $site->view($view, $params);
     },
 
     "read_file_meta" => function($content) use ($site) {

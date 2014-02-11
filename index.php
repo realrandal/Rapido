@@ -56,7 +56,25 @@ $site->loadModules(__DIR__.'/lib/modules');
 
 // route to content mapping
 $site->bind("/*", function() use($site) {
-    return $site->module("rapido")->render_page($site["route"]);
+    
+    $view  = false;
+    $route = str_replace('../', '', rtrim($site["route"], '/'));
+    $path  = $site->path("content:".(strlen($route) ? $route : '/'));
+
+    if($path && is_file($path)) return false; // prevent direct access to files in the content folder
+    
+    if ($path && is_dir($path)) {
+        
+        if(file_exists("{$path}/index.php")) {
+            $view = "{$path}/index.php";
+        }
+
+    } else {
+        
+        $view = $site->path("content:{$route}.php");
+    }
+
+    return $view ? $site->module("rapido")->render_page($view) : false;
 });
 
 // handle 404, 500
