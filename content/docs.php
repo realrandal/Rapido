@@ -98,7 +98,7 @@ View files are using the Lexy syntax. They can also contain regular HTML or PHP.
     key2: value2
     ===
 
-These values will be contained in the  <code>$meta</code> variable in themes/views.
+These values will be available in the  <code>$meta</code> variable in themes/views.
 
 <hr/>
 

@@ -75,6 +75,12 @@ body {
     background: #222;
 }
 
+pre {
+    background: #222;
+    color: #999;
+    border-radius: 3px;
+}
+
 h1,h2,h3,h4,h5,h6 {
     font-weight: bold;
 }
