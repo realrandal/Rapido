@@ -101,14 +101,8 @@ $this->module("rapido")->extend([
                     $key   = trim($parts[0]);
                     $value = trim($parts[1]);
 
-                    if($value==='true' || $value==='false') {
-                        $value = $value==='true' ? true:false;
-                    } elseif (is_numeric($value)) {
-                        $value = ($value+0);
-                    } elseif (preg_match('/^[(.*)]$/', $value) || preg_match('/^{(.*)}$/', $value) ) {
-                        $json = json_decode($value);
-                        if(!is_null($json)) $value = $json;
-                    }
+                    $json = json_decode($value);
+                    if(!is_null($json)) $value = $json;
 
                     $meta[$key] = $value;
                 }
