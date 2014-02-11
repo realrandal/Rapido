@@ -8,17 +8,11 @@
 
 .uk-navbar-nav > li > a {
     color: #999;
-}
-
-.uk-navbar-nav > li > a:hover {
-    background: none;
-}
-
-.uk-navbar-nav > li.uk-active > a {
-    font-weight: bold;
-    background: #fff;
     font-weight: bold;
 }
+
+.uk-navbar-nav > li > a:hover { background: none; }
+.uk-navbar-nav > li.uk-active > a { background: #fff; }
 
 .uk-navbar-brand { font-weight: bold; }
 
@@ -57,10 +51,10 @@
 }
 
 .uk-button.uk-button-large {
-    min-height: 60px;
+    min-height: 45px;
     padding: 0 35px;
-    line-height: 60px;
-    font-size: 22px;
+    line-height: 45px;
+    font-size: 18px;
 }
 
 .uk-button-group .uk-button { border-radius: 0; }
@@ -87,13 +81,14 @@ h1,h2,h3,h4,h5,h6 {
 
 a { color: #72bdfd; }
 
-.site-header, .site-main { background: #fff; }
-
 .site-header {
+    background: #fff;
     padding: 20px 0;
+    border-bottom: 1px #e5e5e5 solid;
 }
 
 .site-main {
+    background: #f5f5f5;
     padding: 40px 0;
     min-height: 450px;
 }
@@ -105,17 +100,14 @@ a { color: #72bdfd; }
 
 .site-footer strong { color: #fff; }
 
-.site-nav-top.uk-subnav a {
-    color: #000;
-    font-size: 12px;
-    font-weight: bold;
-}
-.site-nav-top.uk-subnav a:hover {
-    color: #72bdfd;
-    text-decoration: none;
-}
-
 .site-nav-main {
     margin-top: 10px;
 }
 
+.site-nav-main .nav-secondary a {
+    color: #00A8E6;
+}
+
+.site-nav-main .nav-secondary a:hover {
+    color: red;
+}

@@ -6,7 +6,7 @@
     <title>{{ $meta->title }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    @scripts(['theme:assets/vendor/jquery.js', 'theme:assets/vendor/uikit/js/uikit.min.js'])
+    @scripts(['cockpit:assets/vendor/jquery.js', 'theme:assets/vendor/uikit/js/uikit.min.js'])
     @scripts(['theme:assets/css/theme.css', 'theme:assets/js/theme.js'])
     @trigger("site.header")
 
