@@ -1,7 +1,7 @@
 Rapido
 ======
 
-Rapido is a flexible and crazy fast CMS implementation built on top of Cockpit
+Rapido is a flexible CMS implementation built on top of Cockpit
 
 
 ### Requirements
