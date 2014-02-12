@@ -44,10 +44,18 @@
 }
 
 .uk-button {
-    min-height: 40px;
-    padding: 0 15px;
-    line-height: 40px;
-    font-size: 16px;
+    min-height: 50px;
+    padding: 0 28px;
+    line-height: 50px;
+    font-size: 18px;
+    background: none;
+    color: #444;
+    border: 1px #444 solid;
+}
+
+.uk-button:active, .uk-button.uk-active {
+    background-color: #222;
+    color: #fff;
 }
 
 .uk-button.uk-button-large {
@@ -56,10 +64,6 @@
     line-height: 45px;
     font-size: 18px;
 }
-
-.uk-button-group .uk-button { border-radius: 0; }
-.uk-button-group .uk-button:first-child { border-radius: 3px 0 0 3px; }
-.uk-button-group .uk-button:last-child { border-radius: 0 3px 3px 0; }
 
 
 /*
@@ -96,7 +100,7 @@ a { color: #72bdfd; }
 .site-main {
     background: #f5f5f5;
     padding: 40px 0;
-    min-height: 450px;
+    min-height: 350px;
 }
 
 .site-footer {
@@ -111,7 +115,7 @@ a { color: #72bdfd; }
 }
 
 .site-nav-main .nav-secondary a {
-    color: #00A8E6;
+    color: #000;
 }
 
 .site-nav-main .nav-secondary a:hover {
