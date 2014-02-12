@@ -37,14 +37,46 @@ $this->module("rapido")->extend([
 
         // parse page meta data
 
-        $sitemeta = $site->viewvars["meta"];
-        $meta     = $this->read_file_meta(file_get_contents($view));
+        $sitemeta  = $site->viewvars["meta"];
+        $meta      = $this->read_file_meta(file_get_contents($view));
+        $viewtime  = filemtime($view);
 
         if(count($meta)) {
-
             foreach($meta as $key => $val) {
                 $sitemeta->{$key} = $val;
             }
+        }
+
+        $cache = isset($sitemeta->cache) && $sitemeta->cache ? $sitemeta->cache : false;
+
+        // set layout
+        $view .= $sitemeta->layout ? " with {$sitemeta->layout}" : false;
+
+        if($cache) {
+
+            $cachefile   = md5($view).'.page.html';
+            $cachedfile  = $site->path("tmp:{$cachefile}");
+            $cachetime   = is_numeric($cache) ? $cache : 0;
+
+            if($cachedfile) {
+
+                $cachemtime = filemtime($cachedfile);
+
+
+                // invalidate cache
+                if($cachemtime < $viewtime) {
+                    $cachedfile = null;
+                } elseif ($cachetime && $cachemtime<time()) {
+                    $cachedfile = null;
+                }
+            }
+        }
+
+        if($cache && $cachedfile) {
+
+            $content = file_get_contents($cachedfile);
+
+        } else {
 
             // auto regions
             if(isset($sitemeta->regions)) {
@@ -71,12 +103,18 @@ $this->module("rapido")->extend([
 
                 $params["galleries"] = $galleries;
             }
+
+            $content = $site->view($view, $params);
+
+            if($cache) {
+                if(file_put_contents($site->path("tmp:").$cachefile, $content)) {
+                    $cachedfile = $this->path("tmp:{$cachefile}");
+                    touch($cachedfile, time()+$cachetime);
+                }
+            }
         }
 
-        // set layout
-        $view .= $sitemeta->layout && !$site->req_is("ajax") ? " with {$sitemeta->layout}" : false;
-
-        return $site->view($view, $params);
+        return $content;
     },
 
     "read_file_meta" => function($content) use ($site) {

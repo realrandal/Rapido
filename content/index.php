@@ -20,6 +20,6 @@
     </p>
 
 
-        <a href="@route('/docs')" class="uk-button">Documentation</a>
+    <a href="@route('/docs')" class="uk-button">Documentation</a>
 
 </div>
