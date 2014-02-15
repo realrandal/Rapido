@@ -1,23 +1,31 @@
 @if(count($galleries))
 
-<span class="uk-text-small uk-text-uppercase uk-text-muted">@lang('Latest')</span>
-<ul class="uk-list uk-list-line">
-    @foreach($galleries as $gallery)
-    <li><a href="@route('/galleries/gallery/'.$gallery['_id'])">{{ $gallery["name"] }}</a></li>
-    @endforeach
-</ul>
+    <span class="uk-text-small uk-text-uppercase uk-text-muted">@lang('Latest')</span>
+    <ul class="uk-list uk-list-space">
+        @foreach($galleries as $gallery)
+        <li><a href="@route('/galleries/gallery/'.$gallery['_id'])">{{ $gallery["name"] }}</a></li>
+        @endforeach
+    </ul>
 
-<a class="uk-button uk-button-success uk-button-small" href="@route('/galleries/gallery')" title="@lang('Add gallery')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-plus-circle"></i></a>
-
+    <div>
+        <span class="uk-button-group">
+            @hasaccess?("Galleries", 'create.gallery')
+            <a class="uk-button uk-button-success uk-button-small" href="@route('/galleries/gallery')" title="@lang('Add gallery')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-plus-circle"></i></a>
+            @end
+            <a class="uk-button app-button-secondary uk-button-small" href="@route('/galleries')" title="@lang('Show all galleries')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-list"></i></a>
+        </span>
+    </div>
 @else
 
-<div class="uk-text-center">
-    <h2><i class="uk-icon-picture-o"></i></h2>
-    <p class="uk-text-muted">
-        @lang('You don\'t have any galleries created.')
-    </p>
+    <div class="uk-text-center">
+        <h2><i class="uk-icon-picture-o"></i></h2>
+        <p class="uk-text-muted">
+            @lang('You don\'t have any galleries created.')
+        </p>
 
-    <a href="@route('/galleries/gallery')" class="uk-button uk-button-success">@lang('Create a gallery')</a>
-</div>
+        @hasaccess?("Galleries", 'create.gallery')
+        <a href="@route('/galleries/gallery')" class="uk-button uk-button-success">@lang('Create a gallery')</a>
+        @end
+    </div>
 
 @endif

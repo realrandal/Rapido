@@ -30,7 +30,7 @@ require(__DIR__.'/../bootstrap.php');
 
 $app = cockpit();
 
-if($app->getCollection("cockpit/accounts")->count()) {
+if($app->db->getCollection("cockpit/accounts")->count()) {
     header('Location: ../index.php');
     exit;
 }
@@ -44,7 +44,6 @@ $account = [
     "i18n"     => "en"
 ];
 
-$app->getCollection("cockpit/accounts")->insert($account);
-
+$app->db->insert("cockpit/accounts", $account);
 
 include(__DIR__."/success.php");

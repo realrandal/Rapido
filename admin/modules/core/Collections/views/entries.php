@@ -4,12 +4,21 @@
     td .uk-grid+.uk-grid { margin-top: 5px; }
 </style>
 
-<div data-ng-controller="entries" data-collection='{{ json_encode($collection) }}'>
+<script>
+
+    var COLLECTION = {{ json_encode($collection) }};
+
+</script>
+
+
+<div data-ng-controller="entries">
 
     <nav class="uk-navbar uk-margin-bottom">
         <span class="uk-navbar-brand"><a href="@route("/collections")">@lang('Collections')</a> / {{ $collection['name'] }}</span>
         <ul class="uk-navbar-nav">
+            @hasaccess?("Collections", 'manage.collections')
             <li><a href="@route('/collections/collection/'.$collection["_id"])" title="@lang('Edit collection')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-pencil"></i></a></li>
+            @end
             <li><a href="@route('/collections/entry/'.$collection["_id"])" title="@lang('Add entry')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-plus-circle"></i></a></li>
         </ul>
     </nav>

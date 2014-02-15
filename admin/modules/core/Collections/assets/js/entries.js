@@ -1,10 +1,11 @@
 (function($){
 
-    App.module.controller("entries", function($scope, $rootScope, $http){
+    App.module.controller("entries", function($scope, $rootScope, $http, $timeout){
 
-        $scope.collection = $("[data-ng-controller='entries']").data("collection");
+        $scope.collection = COLLECTION || {};
+        $scope.fields = [];
 
-        $scope.fields     = $scope.collection.fields.filter(function(field){
+        $scope.fields = (COLLECTION.fields.length ? COLLECTION.fields : [COLLECTION.fields]).filter(function(field){
             return field.lst;
         });
 
@@ -19,7 +20,7 @@
         }).error(App.module.callbacks.error.http);
 
         $scope.remove = function(index, entryId){
-            if(confirm(App.i18n.get("Are you sure?"))) {
+            App.Ui.confirm(App.i18n.get("Are you sure?"), function(){
 
                 $http.post(App.route("/api/collections/removeentry"), {
 
@@ -28,13 +29,14 @@
 
                 }, {responseType:"json"}).success(function(data){
 
-                    $scope.entries.splice(index, 1);
-                    $scope.collection.count -= 1;
+                    $timeout(function(){
+                        $scope.entries.splice(index, 1);
+                        $scope.collection.count -= 1;
 
-                    App.notify(App.i18n.get("Entry removed"), "success");
-
+                        App.notify(App.i18n.get("Entry removed"), "success");
+                    }, 0);
                 }).error(App.module.callbacks.error.http);
-            }
+            });
         };
 
     });

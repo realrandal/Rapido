@@ -11,13 +11,17 @@ class Collections extends \Cockpit\Controller {
 
     public function collection($id = null) {
 
+        if(!$this->app->module("auth")->hasaccess("Collections", 'manage.collections')) {
+            return false;
+        }
+
         return $this->render("collections:views/collection.php", compact('id'));
     }
 
 
     public function entries($id) {
 
-        $collection = $this->getCollection("common/collections")->findOne(["_id" => $id]);
+        $collection = $this->app->db->findOne("common/collections", ["_id" => $id]);
 
         if(!$collection) {
             return false;
@@ -32,7 +36,7 @@ class Collections extends \Cockpit\Controller {
 
     public function entry($collectionId, $entryId=null) {
 
-        $collection = $this->getCollection("common/collections")->findOne(["_id" => $collectionId]);
+        $collection = $this->app->db->findOne("common/collections", ["_id" => $collectionId]);
         $entry      = null;
 
         if(!$collection) {
@@ -40,8 +44,8 @@ class Collections extends \Cockpit\Controller {
         }
 
         if($entryId) {
-
-            $entry = $this->app->module("collections")->collectionById($collection["_id"])->findOne(["_id" => $entryId]);
+            $col   = "collection".$collection["_id"];
+            $entry = $this->app->db->findOne("collections/{$col}", ["_id" => $entryId]);
 
             if(!$entry) {
                 return false;

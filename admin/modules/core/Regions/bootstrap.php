@@ -6,7 +6,7 @@ $this->module("regions")->extend([
 
     "render" => function($name, $params = []) use($app) {
 
-        $region = $app->getCollection("common/regions")->findOne(["name"=>$name]);
+        $region = $app->db->findOne("common/regions", ["name"=>$name]);
 
         if(!$region) {
             return null;
@@ -65,7 +65,7 @@ if(COCKPIT_ADMIN) {
 
     $app->on("admin.init", function() use($app){
 
-        if(!$app->module("auth")->hasaccess("Regions","manage")) return;
+        if(!$app->module("auth")->hasaccess("Regions", ['create.regions', 'edit.regions'])) return;
 
         $app->bindClass("Regions\\Controller\\Regions", "regions");
         $app->bindClass("Regions\\Controller\\Api", "api/regions");
@@ -80,7 +80,7 @@ if(COCKPIT_ADMIN) {
         // handle global search request
         $app->on("cockpit.globalsearch", function($search, $list) use($app){
 
-            foreach ($app->getCollection("common/regions")->find()->toArray() as $r) {
+            foreach ($app->db->find("common/regions") as $r) {
                 if(stripos($r["name"], $search)!==false){
                     $list[] = [
                         "title" => '<i class="uk-icon-th-large"></i> '.$r["name"],
@@ -93,17 +93,17 @@ if(COCKPIT_ADMIN) {
 
     $app->on("admin.dashboard", function() use($app){
 
-        if(!$app->module("auth")->hasaccess("Regions","manage")) return;
+        if(!$app->module("auth")->hasaccess("Regions", ['create.regions', 'edit.regions'])) return;
 
         $title   = $app("i18n")->get("Regions");
-        $badge   = $app->getCollection("common/regions")->count();
-        $regions = $app->getCollection("common/regions")->find()->limit(3)->sort(["created"=>-1])->toArray();
-        
+        $badge   = $app->db->getCollection("common/regions")->count();
+        $regions = $app->db->find("common/regions", ["limit"=> 3, "sort"=>["created"=>-1] ]);
+
         echo $app->view("regions:views/dashboard.php with cockpit:views/layouts/dashboard.widget.php", compact('title', 'badge', 'regions'));
     });
 
 
     // acl
-    $app("acl")->addResource("Regions", ['manage']);
+    $app("acl")->addResource("Regions", ['create.regions', 'edit.regions']);
 
 }

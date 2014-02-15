@@ -1,9 +1,18 @@
 (function($){
 
     App.module.controller("groups", function($scope, $rootScope, $http, $timeout){
-        
-        $scope.acl    = angular.copy(ACL_DATA);
-        $scope.active = "admin";
+
+        $scope.acl           = angular.copy(ACL_DATA);
+        $scope.groupsettings = angular.copy(ACL_GROUP_SETTINGS);
+        $scope.active        = "admin";
+
+        Object.keys(ACL_DATA).forEach(function(group){
+            $scope.groupsettings[group] = ACL_GROUP_SETTINGS[group] || {};
+        });
+
+        if (!Object.keys($scope.groupsettings).length) {
+            $scope.groupsettings['admin'] = {};
+        }
 
         if(location.hash && $scope.acl[location.hash.replace("#", "")]) {
             $scope.active = location.hash.replace("#", "");
@@ -21,8 +30,8 @@
 
             if(remove) {
 
-                if(confirm(App.i18n.get("Are you sure?"))) {
-                    
+                App.Ui.confirm(App.i18n.get("Are you sure?"), function() {
+
                     $http.post(App.route("/accounts/deleteGroup"), {"name": oldname}).success(function(data){
 
                         App.notify(App.i18n.get("Group removed!"));
@@ -34,7 +43,7 @@
                         }, 500);
 
                     }).error(App.module.callbacks.error.http);
-                }
+                });
                 return;
             }
 
@@ -61,7 +70,10 @@
 
         $scope.save = function() {
 
-            $http.post(App.route("/accounts/saveAcl"), {"acl": angular.copy($scope.acl)}).success(function(data){
+            $http.post(App.route("/accounts/saveAcl"), {
+                "acl": angular.copy($scope.acl), 
+                "aclSettings": angular.copy($scope.groupsettings)
+            }).success(function(data){
 
                 App.notify(App.i18n.get("Settings saved!"));
 
