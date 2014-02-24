@@ -186,6 +186,7 @@ $site->renderer()->extend(function($content){
 
     // extend lexy parser with cockpit functions
     $content = str_replace('@cockpitjs', '<?php echo cockpit("restservice")->js_lib(); ?>', $content);
+    $content = preg_replace('/(\s*)@assets\((.+?)\)/' , '$1<?php $app("assets")->style_and_script($2); ?>', $content);
     $content = preg_replace('/(\s*)@thumbnail\((.+?)\)/', '$1<?php cockpit("mediamanager")->thumbnail($2); ?>', $content);
     $content = preg_replace('/(\s*)@form\((.+?)\)/', '$1<?php cockpit("forms")->form($2); ?>', $content);
     $content = preg_replace('/(\s*)@region\((.+?)\)/', '$1<?php echo cockpit("regions")->render($2); ?>', $content);
