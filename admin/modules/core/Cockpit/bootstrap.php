@@ -18,7 +18,7 @@ $app['app.assets.base'] = [
 // API
 
 $this->module("cockpit")->extend([
-    
+
     "assets" => function($assets, $key=null, $cache=0, $cache_folder=null) use($app) {
 
         $key          = $key ? $key : md5(serialize($assets));
@@ -98,6 +98,7 @@ if (COCKPIT_ADMIN) {
     $app->helpers["admin"]    = 'Cockpit\\Helper\\Admin';
     $app->helpers["versions"] = 'Cockpit\\Helper\\Versions';
     $app->helpers["backup"]   = 'Cockpit\\Helper\\Backup';
+    $app->helpers["history"]  = 'Cockpit\\Helper\\HistoryLogger';
 
     $app->bind("/", function() use($app){
         return $app->invoke("Cockpit\\Controller\\Base", "dashboard");
@@ -127,12 +128,17 @@ if (COCKPIT_ADMIN) {
         return json_encode(["results"=>$list->getArrayCopy()]);
     });
 
-    // dashboard widget
-    $app->on("admin.dashboard", function() use($app){
+    // dashboard widgets
+    $app->on("admin.dashboard.main", function() use($app){
         $title = $app("i18n")->get("Today");
         echo $app->view("cockpit:views/dashboard/datetime.php with cockpit:views/layouts/dashboard.widget.php", compact('title'));
+    }, 100);
+
+    $app->on("admin.dashboard.main", function() use($app){
+        echo $app->view("cockpit:views/dashboard/history.php", ['history' => $app("history")->load()]);
     }, 5);
 
+    // init admin menus
     $app['admin.menu.top']      = new \PriorityQueue();
     $app['admin.menu.dropdown'] = new \PriorityQueue();
 
