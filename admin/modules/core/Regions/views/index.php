@@ -22,7 +22,7 @@
             <div class="uk-navbar-content">
                 <div class="uk-button-group">
                     <button class="uk-button" data-ng-class="mode=='list' ? 'uk-button-primary':''" data-ng-click="setListMode('list')" title="@lang('List mode')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-th"></i></button>
-                    <button class="uk-button" data-ng-class="mode=='table' ? 'uk-button-primary':''" data-ng-click="setListMode('table')" title="@lang('Table mode')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-list-alt"></i></button>
+                    <button class="uk-button" data-ng-class="mode=='table' ? 'uk-button-primary':''" data-ng-click="setListMode('table')" title="@lang('Table mode')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-th-list"></i></button>
                 </div>
             </div>
         </div>
@@ -56,7 +56,7 @@
 
                 @hasaccess?("Regions", 'create.regions')
                 <div class="uk-margin-top">
-                    <button class="uk-button uk-button-success" title="@lang("Create new group")" data-uk-tooltip="{pos:'right'}" ng-click="addGroup()"><i class="uk-icon-plus-circle"></i></button>
+                    <button class="uk-button uk-button-success" title="@lang('Create new group')" data-uk-tooltip="{pos:'right'}" ng-click="addGroup()"><i class="uk-icon-plus-circle"></i></button>
                 </div>
                 @end
             </div>
@@ -64,26 +64,28 @@
         <div class="uk-width-medium-3-4">
 
             <div class="uk-margin-bottom">
-                <span class="uk-badge app-badge">@@ (activegroup=='-all' ? '@lang("All regions")' : activegroup) @@</span>
+                <span class="uk-badge app-badge">@@ (activegroup=='-all' ? "@lang('All regions')" : activegroup) @@</span>
             </div>
 
             <div class="uk-grid uk-grid-small" data-uk-grid-margin data-uk-grid-match data-ng-if="regions && regions.length && mode=='list'">
                 <div class="uk-width-1-1 uk-width-medium-1-3" data-ng-repeat="region in regions" data-ng-show="matchName(region.name) && inGroup(region.group)">
 
-                    <div class="app-panel app-panel-box">
+                    <div class="app-panel">
 
-                        <strong>@@ region.name @@</strong>
+                        <a class="uk-link-muted" href="@route('/regions/region')/@@ region._id @@"><strong>@@ region.name @@</strong></a>
 
                         <div class="uk-margin">
                             <span class="uk-badge app-badge" title="Last update">@@ region.modified |fmtdate:'d M, Y H:i' @@</span>
                         </div>
 
-                        <span class="uk-button-group">
-                            <a class="uk-button uk-button-small" href="@route('/regions/region')/@@ region._id @@" title="@lang('Edit region')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-pencil"></i></a>
-                            @hasaccess?("Regions", 'create.regions')
-                            <a class="uk-button uk-button-danger uk-button-small" data-ng-click="remove($index, region)" href="#" title="@lang('Delete region')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-minus-circle"></i></a>
-                            @end
-                        </span>
+                        <div class="app-panel-box docked-bottom">
+                            <span class="uk-button-group">
+                                <a class="uk-button uk-button-primary uk-button-small" href="@route('/regions/region')/@@ region._id @@" title="@lang('Edit region')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-pencil"></i></a>
+                                @hasaccess?("Regions", 'create.regions')
+                                <a class="uk-button uk-button-danger uk-button-small" data-ng-click="remove($index, region)" href="#" title="@lang('Delete region')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-minus-circle"></i></a>
+                                @end
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -159,8 +161,10 @@
 
     .group-actions a { font-size: 11px; }
 
-    #groups-list li.uk-active .group-actions { display:block; }
-    #groups-list li.uk-active a { color: #fff; }
-
+    #groups-list li.uk-active .group-actions,
+    #groups-list li:hover .group-actions { display:block; }
+    #groups-list li:hover .group-actions a { color: #666; }
+    #groups-list li.uk-active a,
+    #groups-list li.uk-active .group-actions a { color: #fff; }
 
 </style>

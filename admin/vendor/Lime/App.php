@@ -250,8 +250,13 @@ class App implements \ArrayAccess {
     /**
     * stop application (exit)
     */
-    public function stop(){
+    public function stop($data = false){
         $this->exit = true;
+
+        if($data!==false) {
+            echo $data;
+        }
+
         exit;
     }
 
@@ -640,8 +645,6 @@ class App implements \ArrayAccess {
     public function style($href, $version=false) {
 
         $list = array();
-
-        http://localhost/_IDEAS/cockpit/collections
 
         foreach((array)$href as $style) {
 

@@ -1,14 +1,22 @@
 {{ $app->assets(['collections:assets/collections.js','collections:assets/js/entry.js'], $app['cockpit/version']) }}
 
-{{ $app->assets(['assets:vendor/codemirror/lib/codemirror.js','assets:vendor/codemirror/lib/codemirror.css','assets:vendor/codemirror/theme/pastel-on-dark.css'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/codemirror/mode/xml/xml.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/codemirror/mode/htmlmixed/htmlmixed.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/codemirror/addon/edit/matchbrackets.js', 'assets:vendor/codemirror/addon/selection/active-line.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:vendor/uikit/addons/timepicker/timepicker.min.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:vendor/uikit/addons/datepicker/datepicker.min.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:vendor/uikit/addons/datepicker/datepicker.almost-flat.min.css'], $app['cockpit/version']) }}
+
+{{ $app->assets(['assets:vendor/codemirror/codemirror.js','assets:vendor/codemirror/codemirror.css','assets:vendor/codemirror/pastel-on-dark.css'], $app['cockpit/version']) }}
 {{ $app->assets(['assets:angular/directives/codearea.js'], $app['cockpit/version']) }}
 
 {{ $app->assets(['assets:vendor/tinymce/tinymce.min.js'], $app['cockpit/version']) }}
 {{ $app->assets(['assets:vendor/tinymce/langs/'.$app("i18n")->locale.'.js'], $app['cockpit/version']) }}
+
+{{ $app->assets(['assets:vendor/uikit/addons/markdownarea/markdownarea.almost-flat.min.css','assets:vendor/uikit/addons/markdownarea/markdownarea.min.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:vendor/marked.js'], $app['cockpit/version']) }}
+
+
 {{ $app->assets(['assets:angular/directives/wysiwyg.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:angular/directives/markdownarea.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:angular/directives/gallery.js'], $app['cockpit/version']) }}
 
 {{ $app->assets(['mediamanager:assets/pathpicker.directive.js'], $app['cockpit/version']) }}
 
@@ -83,6 +91,14 @@
                             <textarea wysiwyg="{document_base_url:'{{ $app->pathToUrl('site:') }}'}" class="uk-width-1-1 uk-form-large" data-ng-class="{'uk-form-danger':field.error}" data-ng-model="entry[field.name]"></textarea>
                         </div>
 
+                        <div data-ng-switch-when="markdown">
+                            <markdown data-ng-model="entry[field.name]"></markdown>
+                        </div>
+
+                        <div data-ng-switch-when="gallery">
+                            <gallery data-ng-model="entry[field.name]"></gallery>
+                        </div>
+
                         <div data-ng-switch-default>
                             <input class="uk-width-1-1 uk-form-large" type="text" data-ng-class="{'uk-form-danger':field.error}" data-ng-model="entry[field.name]">
                         </div>
@@ -114,6 +130,14 @@
 
                         <div data-ng-switch-when="boolean">
                             <input type="checkbox" data-ng-model="entry[field.name]">
+                        </div>
+
+                        <div data-ng-switch-when="date">
+                            <input class="uk-width-1-1 uk-form-large" type="text" data-ng-class="{'uk-form-danger':field.error}" data-uk-datepicker="{format:'YYYY-MM-DD'}" data-ng-model="entry[field.name]">
+                        </div>
+
+                        <div data-ng-switch-when="time">
+                            <input class="uk-width-1-1 uk-form-large" type="text" data-ng-class="{'uk-form-danger':field.error}" data-uk-timepicker data-ng-model="entry[field.name]">
                         </div>
 
                         <div data-ng-switch-default>

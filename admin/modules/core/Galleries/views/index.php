@@ -22,7 +22,7 @@
             <div class="uk-navbar-content">
                 <div class="uk-button-group">
                     <button class="uk-button" data-ng-class="mode=='list' ? 'uk-button-primary':''" data-ng-click="setListMode('list')" title="@lang('List mode')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-th"></i></button>
-                    <button class="uk-button" data-ng-class="mode=='table' ? 'uk-button-primary':''" data-ng-click="setListMode('table')" title="@lang('Table mode')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-list-alt"></i></button>
+                    <button class="uk-button" data-ng-class="mode=='table' ? 'uk-button-primary':''" data-ng-click="setListMode('table')" title="@lang('Table mode')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-th-list"></i></button>
                 </div>
             </div>
         </div>
@@ -56,7 +56,7 @@
 
                 @hasaccess?("Galleries", 'create.gallery')
                 <div class="uk-margin-top">
-                    <button class="uk-button uk-button-success" title="@lang("Create new group")" data-uk-tooltip="{pos:'right'}" ng-click="addGroup()"><i class="uk-icon-plus-circle"></i></button>
+                    <button class="uk-button uk-button-success" title="@lang('Create new group')" data-uk-tooltip="{pos:'right'}" ng-click="addGroup()"><i class="uk-icon-plus-circle"></i></button>
                 </div>
                 @end
             </div>
@@ -70,21 +70,28 @@
             <div class="uk-grid uk-grid-small" data-uk-grid-margin data-uk-grid-match data-ng-if="galleries && galleries.length && mode=='list'">
                 <div class="uk-width-1-1 uk-width-medium-1-3" data-ng-repeat="gallery in galleries" data-ng-show="matchName(gallery.name) && inGroup(gallery.group)">
 
-                    <div class="app-panel app-panel-box">
+                    <div class="app-panel">
 
-                        <strong>@@ gallery.name @@</strong>
+                        <a class="uk-link-muted" href="@route('/galleries/gallery')/@@ gallery._id @@"><strong>@@ gallery.name @@</strong></a>
 
                         <div class="uk-margin">
                             <span class="uk-badge app-badge" title="Last update">@@ gallery.modified |fmtdate:'d M, Y H:i' @@</span>
                         </div>
 
+                        <div style="min-height:30px;">
+                            <div class="uk-thumbnail uk-rounded uk-thumb-small uk-margin-small-right" data-ng-repeat="image in gallery.images" ng-if="$index < 6">
+                                <img ng-src="@route('/mediamanager/thumbnail')/@@ image.path|base64 @@/20/20" width="20" height="20" title="@@ image.path @@">
+                            </div>
+                        </div>
 
-                        <span class="uk-button-group">
-                            <a class="uk-button uk-button-small" href="@route('/galleries/gallery')/@@ gallery._id @@" title="@lang('Edit gallery')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-pencil"></i></a>
-                            @hasaccess?("Galleries", 'create.gallery')
-                            <a class="uk-button uk-button-danger uk-button-small" data-ng-click="remove($index, gallery)" href="#" title="@lang('Delete gallery')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-minus-circle"></i></a>
-                            @end
-                        </span>
+                        <div class="app-panel-box docked-bottom">
+                            <span class="uk-button-group">
+                                <a class="uk-button uk-button-primary uk-button-small" href="@route('/galleries/gallery')/@@ gallery._id @@" title="@lang('Edit gallery')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-pencil"></i></a>
+                                @hasaccess?("Galleries", 'create.gallery')
+                                <a class="uk-button uk-button-danger uk-button-small" data-ng-click="remove($index, gallery)" href="#" title="@lang('Delete gallery')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-minus-circle"></i></a>
+                                @end
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -95,12 +102,18 @@
                         <tr>
                             <th>@lang('Gallery')</th>
                             <th></th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr data-ng-repeat="gallery in galleries" data-ng-show="matchName(gallery.name) && inGroup(gallery.group)">
                             <td>
                                 <a href="@route('/galleries/gallery')/@@ gallery._id @@">@@ gallery.name @@</a>
+                            </td>
+                            <td>
+                                <div class="uk-thumbnail uk-rounded uk-thumb-small uk-margin-small-right" data-ng-repeat="image in gallery.images" ng-if="$index < 6">
+                                    <img ng-src="@route('/mediamanager/thumbnail')/@@ image.path|base64 @@/20/20" width="20" height="20" title="@@ image.path @@">
+                                </div>
                             </td>
                             <td align="right">
                                 @hasaccess?("Galleries", 'create.gallery')
@@ -159,8 +172,11 @@
 
     .group-actions a { font-size: 11px; }
 
-    #groups-list li.uk-active .group-actions { display:block; }
-    #groups-list li.uk-active a { color: #fff; }
+    #groups-list li.uk-active .group-actions,
+    #groups-list li:hover .group-actions { display:block; }
+    #groups-list li:hover .group-actions a { color: #666; }
+    #groups-list li.uk-active a,
+    #groups-list li.uk-active .group-actions a { color: #fff; }
 
 
 </style>

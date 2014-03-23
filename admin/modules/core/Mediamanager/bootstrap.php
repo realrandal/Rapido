@@ -84,8 +84,13 @@ if (!function_exists('thumbnail')) {
     }
 }
 
+//rest
+$app->on("cockpit.rest.init", function($routes) {
+    $routes["mediamanager"] = 'Mediamanager\\Controller\\RestApi';
+});
 
-if(COCKPIT_ADMIN) {
+
+if(COCKPIT_ADMIN && !COCKPIT_REST) {
 
 
     $app->on("app.layout.header", function() use($app){
@@ -117,7 +122,7 @@ if(COCKPIT_ADMIN) {
         $app("admin")->menu("top", [
             "url"    => $app->routeUrl("/mediamanager"),
             "label"  => '<i class="uk-icon-cloud"></i>',
-            "title"  => "Mediamanager",
+            "title"  => $app("i18n")->get("Mediamanager"),
             "active" => (strpos($app["route"], '/mediamanager') === 0)
         ], 0);
 

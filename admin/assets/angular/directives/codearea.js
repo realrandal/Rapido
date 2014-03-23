@@ -1,5 +1,28 @@
 (function($){
 
+    function autocomplete(cm) {
+      var doc = cm.getDoc(),
+          cur = cm.getCursor(),
+          toc = cm.getTokenAt(cur),
+          mode = CodeMirror.innerMode(cm.getMode(), toc.state).mode.name;
+
+      if(!toc.string.trim()) return;
+
+      if (mode == 'xml') { //html depends on xml
+
+          if(toc.string.charAt(0) == "<" || toc.type == "attribute") {
+              CodeMirror.showHint(cm, CodeMirror.hint.html, {completeSingle:false});
+          }
+
+      } else if (mode == 'javascript') {
+          CodeMirror.showHint(cm, CodeMirror.hint.javascript, {completeSingle:false});
+      } else if (mode == 'css' || mode == 'less') {
+          CodeMirror.showHint(cm, CodeMirror.hint.css, {completeSingle:false});
+      } else {
+          CodeMirror.showHint(cm, CodeMirror.hint.anyword, {completeSingle:false});
+      }
+    };
+
     angular.module('cockpit.directives').directive("codearea", function($timeout){
 
         var events = ["cursorActivity", "viewportChange", "gutterClick", "focus", "blur", "scroll", "update"];
@@ -13,13 +36,15 @@
                 var opts, onChange, deferCodeMirror, codeMirror;
 
                 if (elm[0].type !== 'textarea') {
-                  throw new Error('uiCodemirror3 can only be applied to a textarea element');
+                  throw new Error('Codemirror can only be applied to a textarea element');
                 }
 
                 opts = angular.extend({
                     lineNumbers: true,
                     styleActiveLine: true,
                     matchBrackets: true,
+                    autoCloseBrackets: true,
+                    autoCloseTags: true,
                     mode: 'text',
                     theme: 'pastel-on-dark'
                 }, scope.$eval(attrs.codearea));
@@ -42,24 +67,31 @@
 
                 deferCodeMirror = function () {
 
+                  switch(opts.mode) {
+                      case 'js':
+                      case 'json':
+                          opts.mode = 'javascript';
+                          break;
+                      case 'md':
+                          opts.mode = 'markdown';
+                          break;
+                      case 'php':
+                          opts.mode = 'application/x-httpd-php';
+                          break;
+                  }
+
                   codeMirror = CodeMirror.fromTextArea(elm[0], opts);
 
                   if(elm.data) {
                     elm.data("codearea", codeMirror);
                   }
 
-                  // autoload modes
-                  if(opts.mode && opts.mode!='text' && opts.mode.indexOf('/')==-1) {
-                    App.assets.require(['/assets/vendor/codemirror/mode/%N/%N.js'.replace(/%N/g, opts.mode)], function(){
-                        codeMirror.setOption("mode", opts.mode);
-                    });
-                  }
+                  codeMirror.setOption("mode", opts.mode);
+                  codeMirror.setOption("theme", opts.theme);
 
-                  if(opts.theme) {
-                    App.assets.require(['/assets/vendor/codemirror/theme/%N.css'.replace(/%N/g, opts.theme)], function(){
-                        codeMirror.setOption("theme", opts.theme);
-                    });
-                  }
+                  codeMirror.on("inputRead", $.UIkit.Utils.debounce(function(){
+                    autocomplete(codeMirror);
+                  }, 200));
 
                   if (angular.isDefined(scope[attrs.codearea])) {
                     scope.$watch(attrs.codearea, function (newValues) {

@@ -54,9 +54,11 @@
                 return;
             }
 
-            var msg = $.UIkit.notify(['<i class="uk-icon-spinner uk-icon-spin"></i>', App.i18n.get("Restoring version...")].join(" "), {timeout:0});
 
             App.Ui.confirm(App.i18n.get("Are you sure?"), function(){
+
+                var msg = $.UIkit.notify(['<i class="uk-icon-spinner uk-icon-spin"></i>', App.i18n.get("Restoring version...")].join(" "), {timeout:0});
+
                 $http.post(App.route("/api/collections/restoreVersion"), {"docId":$scope.entry["_id"], "colId":$scope.collection["_id"],"versionId":versionId}).success(function(data){
 
                     setTimeout(function(){
@@ -107,7 +109,7 @@
 
                 fields = $scope.collection.fields.filter(function(field){
 
-                    return (['text','html', 'markdown','code','wysiwyg'].indexOf(field.type) > -1);
+                    return (['text','html', 'markdown','code','wysiwyg','markdown', 'gallery'].indexOf(field.type) > -1);
                 });
 
             }

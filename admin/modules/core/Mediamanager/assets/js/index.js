@@ -1,5 +1,28 @@
 (function($){
 
+    function autocomplete(cm) {
+        var doc = cm.getDoc(),
+            cur = cm.getCursor(),
+            toc = cm.getTokenAt(cur),
+            mode = CodeMirror.innerMode(cm.getMode(), toc.state).mode.name;
+
+        if(!toc.string.trim()) return;
+
+        if (mode == 'xml') { //html depends on xml
+
+            if(toc.string.charAt(0) == "<" || toc.type == "attribute") {
+                CodeMirror.showHint(cm, CodeMirror.hint.html, {completeSingle:false});
+            }
+
+        } else if (mode == 'javascript') {
+            CodeMirror.showHint(cm, CodeMirror.hint.javascript, {completeSingle:false});
+        } else if (mode == 'css' || mode == 'less') {
+            CodeMirror.showHint(cm, CodeMirror.hint.css, {completeSingle:false});
+        } else {
+            CodeMirror.showHint(cm, CodeMirror.hint.anyword, {completeSingle:false});
+        }
+    };
+
     var Editor = {
 
         init: function($scope) {
@@ -18,10 +41,17 @@
                                lineNumbers: true,
                                styleActiveLine: true,
                                matchBrackets: true,
+                               autoCloseBrackets: true,
+                               autoCloseTags: true,
+                               mode: 'text',
                                theme: 'pastel-on-dark'
                            });
 
             this.filename = this.element.find(".filename");
+
+            this.code.on("inputRead", $.UIkit.Utils.debounce(function(){
+              autocomplete($this.code);
+            }, 200));
 
             this.resize();
 
@@ -82,8 +112,6 @@
             var ext  = file.name.split('.').pop().toLowerCase(),
                 mode = "text";
 
-            this.code.setOption("mode", "text");
-
             switch(ext) {
                 case 'css':
                 case 'less':
@@ -100,27 +128,19 @@
                     mode = 'markdown';
                     break;
                 case 'php':
-                    mode = 'php';
+                    mode = 'application/x-httpd-php';
+                    break;
+                case "txt":
+                    mode = 'text';
                     break;
             }
 
-            // autoload modes
-            if(mode!='text') {
-                App.assets.require(['/assets/vendor/codemirror/mode/%N/%N.js'.replace(/%N/g, mode)], function(){
-
-                    switch(mode) {
-                        case "php":
-                            Editor.code.setOption("mode", "application/x-httpd-php");
-                            break;
-                        default:
-                          Editor.code.setOption("mode", mode);
-                    }
-                });
-            }
+            Editor.code.setOption("mode", mode);
 
             this.filename.text(file.name);
 
             this.code.setValue(content);
+            this.code.getDoc().clearHistory();
 
             this.element.show();
             this.resize();
@@ -205,7 +225,7 @@
 
                     case "createfile":
 
-                        var name = prompt("Please enter a filename:", "");
+                        var name = prompt(App.i18n.get('Please enter a filename:'), "");
 
                         if($.trim(name)) {
                             requestapi({"cmd":"createfile", "path": currentpath, "name":name}, function(){
@@ -230,7 +250,7 @@
                     media = "image";
                 }
 
-                if(file.name.match(/\.(txt|md|php|js|css|scss|sass|less|htm|html|json|xml|svg)$/i)) {
+                if(file.name.match(/\.(htaccess|txt|md|php|js|css|scss|sass|less|htm|html|json|xml|svg)$/i)) {
                     media = "text";
                 }
 

@@ -1,13 +1,4 @@
-{{ $app->assets(['assets:vendor/codemirror/lib/codemirror.js','assets:vendor/codemirror/lib/codemirror.css','assets:vendor/codemirror/theme/pastel-on-dark.css'], $app['cockpit/version']) }}
-
-{{ $app->assets(['assets:vendor/codemirror/mode/xml/xml.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/codemirror/mode/htmlmixed/htmlmixed.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/codemirror/mode/javascript/javascript.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/codemirror/mode/css/css.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/codemirror/mode/clike/clike.js'], $app['cockpit/version']) }}
-
-{{ $app->assets(['assets:vendor/codemirror/addon/edit/matchbrackets.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/codemirror/addon/selection/active-line.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:vendor/codemirror/codemirror.js','assets:vendor/codemirror/codemirror.css','assets:vendor/codemirror/pastel-on-dark.css'], $app['cockpit/version']) }}
 
 {{ $app->assets(['assets:vendor/ajaxupload.js'], $app['cockpit/version']) }}
 {{ $app->assets(['assets:vendor/loadie/jquery.loadie.js', 'assets:vendor/loadie/loadie.css'], $app['cockpit/version']) }}
@@ -50,7 +41,7 @@
             <li class="media-upload-button">
                 <a><i class="uk-icon-upload"></i>&nbsp; </a>
                 <form id="frmMediaUpload" action="">
-                    <input type="file" name="files[]" onchange="jQuery(this.form).trigger('submit')">
+                    <input type="file" name="files[]" onchange="jQuery(this.form).trigger('submit')" multiple="true">
                 </form>
             </li>
         </ul>
@@ -69,7 +60,7 @@
 
             <div class="uk-navbar-content">
                 <div class="uk-button-group">
-                    <button class="uk-button" data-ng-class="mode=='table' ? 'uk-button-primary':''" data-ng-click="(mode='table')" title="@lang('Table mode')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-list-alt"></i></button>
+                    <button class="uk-button" data-ng-class="mode=='table' ? 'uk-button-primary':''" data-ng-click="(mode='table')" title="@lang('Table mode')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-th-list"></i></button>
                     <button class="uk-button" data-ng-class="mode=='list' ? 'uk-button-primary':''" data-ng-click="(mode='list')" title="@lang('List mode')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-th"></i></button>
                 </div>
             </div>
@@ -93,36 +84,37 @@
             </div>
         </div>
 
-        <ul class="uk-clearfix media-dir" data-ng-show="mode=='list' && dir && (dir.folders.length || dir.files.length)">
-            <li class="uk-width-medium-1-5 uk-width-1-1 uk-float-left" ng-repeat="folder in dir.folders" data-type="folder" data-ng-hide="(viewfilter=='files' || !matchName(folder.name))">
-                <div>
-                    <div class="mm-type">
+        <ul class="uk-grid uk-grid-small" data-ng-show="mode=='list' && dir && (dir.folders.length || dir.files.length)">
+            <li class="uk-grid-margin uk-width-medium-1-5 uk-width-1-1" ng-repeat="folder in dir.folders" data-type="folder" data-ng-hide="(viewfilter=='files' || !matchName(folder.name))">
+                <div class="app-panel">
+                    <div class="mm-type mm-type-folder">
                         <i class="uk-icon-folder-o"></i>
-                        <div class="mm-actions">
-                            <ul class="uk-subnav uk-subnav-line">
-                                <li><a ng-click="addBookmark(folder)" title="@lang('Bookmark folder')"><i class="uk-icon-star"></i></a></li>
-                                <li><a ng-click="action('rename', folder)" title="@lang('Rename folder')"><i class="uk-icon-text-width"></i></a></li>
-                                <li><a ng-click="action('remove', folder)" title="@lang('Delete folder')"><i class="uk-icon-minus-circle"></i></a></li>
-                            </ul>
-                        </div>
                     </div>
-                    <div class="uk-text-truncate mm-caption" title="@@ folder.name @@"><a href="#@@ folder.path @@" ng-click="updatepath(folder.path)">@@ folder.name @@</a></div>
+                    <div class="app-panel-box docked-bottom uk-text-center">
+                        <div class="uk-text-truncate mm-caption" title="@@ folder.name @@"><a href="#@@ folder.path @@" ng-click="updatepath(folder.path)">@@ folder.name @@</a></div>
+                        <ul class="uk-subnav uk-subnav-line mm-actions">
+                            <li><a ng-click="addBookmark(folder)" title="@lang('Bookmark folder')"><i class="uk-icon-star"></i></a></li>
+                            <li><a ng-click="action('rename', folder)" title="@lang('Rename folder')"><i class="uk-icon-text-width"></i></a></li>
+                            <li><a ng-click="action('remove', folder)" title="@lang('Delete folder')"><i class="uk-icon-minus-circle"></i></a></li>
+                        </ul>
+                    </div>
                 </div>
             </li>
-            <li class="uk-width-medium-1-5 uk-width-1-1 uk-float-left" ng-repeat="file in dir.files" data-ng-hide="(viewfilter=='folders' || !matchName(file.name))">
-                <div>
-                    <div class="mm-type">
+            <li class="uk-grid-margin uk-width-medium-1-5 uk-width-1-1" ng-repeat="file in dir.files" data-ng-hide="(viewfilter=='folders' || !matchName(file.name))">
+                <div class="app-panel">
+                    <div class="mm-type mm-type-file">
                         <i class="uk-icon-file-o" media-preview="@@ file.url @@"></i>
-                        <div class="mm-actions">
-                            <ul class="uk-subnav uk-subnav-line">
-                                <li><a ng-click="addBookmark(file)" title="@lang('Bookmark file')"><i class="uk-icon-star"></i></a></li>
-                                <li><a ng-click="action('rename', file)" title="@lang('Rename file')"><i class="uk-icon-text-width"></i></a></li>
-                                <li><a ng-click="action('download', file)" title="@lang('Download file')"><i class="uk-icon-paperclip"></i></a></li>
-                                <li><a ng-click="action('remove', file)" title="@lang('Delete file')"><i class="uk-icon-minus-circle"></i></a></li>
-                            </ul>
-                        </div>
+
                     </div>
-                    <div class="uk-text-truncate mm-caption" title="@@ file.name @@"><a ng-click="open(file)">@@ file.name @@</a></div>
+                    <div class="app-panel-box docked-bottom uk-text-center">
+                        <div class="uk-text-truncate mm-caption" title="@@ file.name @@"><a ng-click="open(file)">@@ file.name @@</a></div>
+                        <ul class="uk-subnav uk-subnav-line mm-actions">
+                            <li><a ng-click="addBookmark(file)" title="@lang('Bookmark file')"><i class="uk-icon-star"></i></a></li>
+                            <li><a ng-click="action('rename', file)" title="@lang('Rename file')"><i class="uk-icon-text-width"></i></a></li>
+                            <li><a ng-click="action('download', file)" title="@lang('Download file')"><i class="uk-icon-paperclip"></i></a></li>
+                            <li><a ng-click="action('remove', file)" title="@lang('Delete file')"><i class="uk-icon-minus-circle"></i></a></li>
+                        </ul>
+                    </div>
                 </div>
             </li>
         </ul>
@@ -183,7 +175,7 @@
         </table>
 
         <div class="uk-margin uk-text-center" data-ng-show="dir && (!dir.folders.length && !dir.files.length)">
-            <h2><i class="uk-icon-folder-o-open-o"></i></h2>
+            <h2><i class="uk-icon-folder-open-o"></i></h2>
             <p class="uk-text-large">
                 @lang('This folder is empty.')
             </p>
@@ -222,62 +214,33 @@
         cursor: pointer;
     }
 
-    .media-dir {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
 
-    .media-dir > li > div {
-        padding: 10px;
-        min-height: 100px;
-    }
-
-    .media-dir .mm-type {
+    .mm-type {
         position: relative;
         text-align: center;
         padding: 15px;
-        height: 70px;
+        height: 50px;
     }
 
-    .media-dir .mm-type > i {
+    .mm-type > div {
+        height: 40px;
+    }
+
+    .mm-type > i {
         font-size: 40px;
     }
 
-    .media-dir .mm-type .mm-actions {
-        display: none;
-        position: absolute;
-        top: 45%;
-        left: 0;
-        right: 0;
+    .mm-type-folder > i {
+        color: #ccc;
     }
 
-    .media-dir .mm-type:hover .mm-actions {
-        display: block;
-    }
-
-    .media-dir .mm-type .mm-actions > ul {
-        display: inline-block;
-        background: #eee;
-        background: rgba(0,0,0,0.75);
-        padding: 5px 20px;
-        border-radius: 3px;
-    }
-
-    .media-dir .mm-type .mm-actions a {
-        color: #fff;
-        cursor: pointer;
-        font-size: 11px;
-    }
-
-    table.uk-table .uk-subnav {
-        padding: 0;
-        margin: 0;
-    }
-
-    .media-dir .mm-caption {
+    .mm-caption {
         text-align: center;
     }
+
+    ul .mm-actions { margin: 10px 0 0 0; }
+
+    ul .mm-actions > li > a { color: #ccc; }
 
     .media-upload-button {
         position: relative;
@@ -300,12 +263,6 @@
     }
 
     .mm-actions { cursor: pointer; }
-
-    .media-url-preview {
-        background-repeat:no-repeat;
-        background-position: 50% 50%;
-        background-size:contain;
-    }
 
     .media-dir .media-url-preview {
         height: 35px;

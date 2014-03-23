@@ -1,5 +1,5 @@
 {{ $app->assets(['collections:assets/collections.js','collections:assets/js/collection.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/uikit/addons/css/sortable.almost-flat.min.css','assets:vendor/uikit/addons/js/sortable.min.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:vendor/uikit/addons/sortable/sortable.almost-flat.min.css','assets:vendor/uikit/addons/sortable/sortable.min.js'], $app['cockpit/version']) }}
 
 <div data-ng-controller="collection" data-id="{{ $id }}" ng-cloak>
 
@@ -8,7 +8,6 @@
         <span class="uk-text-muted" ng-show="!collection.name">@lang('Collection')</span>
         <span ng-show="collection.name">@@ collection.name @@</span>
     </h1>
-
 
     <form class="uk-form" data-ng-submit="save()" data-ng-show="collection">
 
@@ -38,22 +37,24 @@
                             <li class="uk-margin-bottom" data-ng-repeat="field in collection.fields">
 
 
-                                <input type="text" data-ng-model="field.name" placeholder="Field name" pattern="[a-zA-Z0-9]+" required>
-                                <select data-ng-model="field.type" title="Field type" data-uk-tooltip>
+                                <input type="text" data-ng-model="field.name" placeholder="@lang('Field name')" pattern="[a-zA-Z0-9]+" required>
+                                <select data-ng-model="field.type" title="@lang('Field type')" data-uk-tooltip>
                                     <option value="text">Text</option>
                                     <option value="select">Select</option>
                                     <option value="boolean">Boolean</option>
                                     <option value="html">Html</option>
                                     <option value="wysiwyg">Html (WYSIWYG)</option>
                                     <option value="code">Code</option>
+                                    <option value="markdown">Markdown</option>
                                     <option value="date">Date</option>
                                     <option value="time">Time</option>
                                     <option value="media">Media</option>
+                                    <option value="gallery">Gallery</option>
                                 </select>
 
-                                <input type="text" data-ng-if="field.type=='select'" data-ng-model="field.options" ng-list placeholder="options...." title="@lang('Separate different options by comma')" data-uk-tooltip>
+                                <input type="text" data-ng-if="field.type=='select'" data-ng-model="field.options" ng-list placeholder="@lang('options...')" title="@lang('Separate different options by comma')" data-uk-tooltip>
 
-                                <select data-ng-if="field.type=='code'" data-ng-model="field.syntax" title="Code syntax" data-uk-tooltip>
+                                <select data-ng-if="field.type=='code'" data-ng-model="field.syntax" title="@lang('Code syntax')" data-uk-tooltip>
                                     <option value="text">Text</option>
                                     <option value="css">CSS</option>
                                     <option value="htmlmixed">Html</option>
@@ -61,11 +62,11 @@
                                     <option value="markdown">Markdown</option>
                                 </select>
 
-                                <input type="text" data-ng-model="field.default" placeholder="default value...">
+                                <input type="text" data-ng-model="field.default" placeholder="@lang('default value...')">
 
                                 <span>
                                     <input type="checkbox" data-ng-model="field.required" />
-                                    <label>Required</label>
+                                    <label>@lang('Required')</label>
                                 </span>
 
                                 <a data-ng-click="remove(field)" class="uk-close"></a>
@@ -109,9 +110,9 @@
                         @lang('Order entries on list page'):
                     </p>
                     <select class="uk-width-1-1 uk-margin-bottom" data-ng-model="collection.sortfield">
+                        <option value="@@ field.name @@" data-ng-repeat="field in collection.fields">@@ field.name @@</option>
                         <option value="created">@lang('created')</option>
                         <option value="modified">@lang('modified')</option>
-                        <option value="@@ field.name @@" data-ng-repeat="field in collection.fields">@@ field.name @@</option>
                     </select>
                     <select class="uk-width-1-1" data-ng-model="collection.sortorder">
                         <option value="-1">@lang('descending')</option>

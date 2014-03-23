@@ -8,10 +8,8 @@ $app['app.assets.base'] = [
     'assets:vendor/i18n.js',
     'assets:vendor/uikit/js/uikit.min.js',
     'assets:vendor/uikit/css/uikit.min.css',
-    'assets:vendor/uikit/addons/js/notify.min.js',
-    'assets:vendor/uikit/addons/css/notify.almost-flat.min.css',
-    'assets:vendor/modalbox/modalbox.css',
-    'assets:vendor/modalbox/modalbox.js'
+    'assets:vendor/uikit/addons/notify/notify.min.js',
+    'assets:vendor/uikit/addons/notify/notify.almost-flat.min.css'
 ];
 
 
@@ -33,6 +31,7 @@ $this->module("cockpit")->extend([
     },
 
     "get_registry" => function($key, $default=null) use($app) {
+
         return $app->memory->hget("cockpit.api.registry", $key, $default);
     }
 ]);
@@ -47,7 +46,7 @@ if (!function_exists('assets')) {
 if (!function_exists('get_registry')) {
 
     function get_registry($key, $default=null) {
-        cockpit("cockpit")->get_registry($key, $default);
+        return cockpit("cockpit")->get_registry($key, $default);
     }
 }
 
@@ -81,7 +80,7 @@ $app->renderer()->extend(function($content){
 
 // Admin
 
-if (COCKPIT_ADMIN) {
+if (COCKPIT_ADMIN && !COCKPIT_REST) {
 
     $app["cockpit"] = json_decode($app->helper("fs")->read("#root:package.json"), true);
 

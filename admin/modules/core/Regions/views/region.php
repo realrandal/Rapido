@@ -1,29 +1,11 @@
 {{ $app->assets(['regions:assets/regions.js','regions:assets/js/region.js'], $app['cockpit/version']) }}
 
-{{ $app->assets(['assets:vendor/uikit/addons/css/sortable.almost-flat.min.css','assets:vendor/uikit/addons/js/sortable.min.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:vendor/uikit/addons/sortable/sortable.almost-flat.min.css','assets:vendor/uikit/addons/sortable/sortable.min.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:vendor/uikit/addons/timepicker/timepicker.min.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:vendor/uikit/addons/datepicker/datepicker.min.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:vendor/uikit/addons/datepicker/datepicker.almost-flat.min.css'], $app['cockpit/version']) }}
 
-{{ $app->assets(['assets:vendor/codemirror/lib/codemirror.js','assets:vendor/codemirror/lib/codemirror.css','assets:vendor/codemirror/theme/pastel-on-dark.css'], $app['cockpit/version']) }}
-
-{{ $app->assets(['assets:vendor/codemirror/mode/xml/xml.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/codemirror/mode/htmlmixed/htmlmixed.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/codemirror/mode/javascript/javascript.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/codemirror/mode/css/css.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/codemirror/mode/clike/clike.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/codemirror/mode/php/php.js'], $app['cockpit/version']) }}
-
-{{ $app->assets(['assets:vendor/codemirror/addon/edit/matchbrackets.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/codemirror/addon/edit/closetag.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/codemirror/addon/fold/xml-fold.js'], $app['cockpit/version']) }}
-
-{{ $app->assets(['assets:vendor/codemirror/addon/hint/show-hint.js', 'assets:vendor/codemirror/addon/hint/show-hint.css'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/codemirror/addon/hint/xml-hint.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/codemirror/addon/hint/html-hint.js'], $app['cockpit/version']) }}
-
-<script>
-  CodeMirror.commands.htmlautocomplete = function(cm) {
-    CodeMirror.showHint(cm, CodeMirror.hint.html);
-  };
-</script>
+{{ $app->assets(['assets:vendor/codemirror/codemirror.js','assets:vendor/codemirror/codemirror.css','assets:vendor/codemirror/pastel-on-dark.css'], $app['cockpit/version']) }}
 
 {{ $app->assets(['assets:angular/directives/codearea.js'], $app['cockpit/version']) }}
 
@@ -32,6 +14,10 @@
 {{ $app->assets(['assets:angular/directives/wysiwyg.js'], $app['cockpit/version']) }}
 
 {{ $app->assets(['mediamanager:assets/pathpicker.directive.js'], $app['cockpit/version']) }}
+
+{{ $app->assets(['assets:vendor/uikit/addons/markdownarea/markdownarea.almost-flat.min.css','assets:vendor/uikit/addons/markdownarea/markdownarea.min.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:vendor/marked.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:angular/directives/markdownarea.js'], $app['cockpit/version']) }}
 
 
 <div data-ng-controller="region" data-id="{{ $id }}">
@@ -95,8 +81,15 @@
                                 <h3>@lang('Region fields')</h3>
                             </div>
 
+                            <div class="uk-margin-bottom">
+                              <button type="button" class="uk-button" data-ng-class="manageform ? 'uk-button-success':'uk-button-primary'" data-ng-click="(manageform = !manageform)" title="@lang('Manage form')">
+                                  <span ng-show="!manageform"><i class="uk-icon-cog"></i></span>
+                                  <span ng-show="manageform"><i class="uk-icon-check"></i></span>
+                              </button>
+                            </div>
+
                             <div class="uk-grid">
-                              <div class="uk-width-4-5">
+                              <div class="uk-width-1-1">
 
                                   <div class="uk-alert" ng-show="region && !region.fields.length">
                                     @lang('This region has no fields yet.')
@@ -108,22 +101,23 @@
                                          <li data-ng-repeat="field in region.fields">
                                             <div class="uk-sortable-item uk-sortable-item-table">
                                                <div class="uk-sortable-handle"></div>
-                                               <input type="text" data-ng-model="field.name" placeholder="Field name" pattern="[a-zA-Z0-9]+" required>
-                                               <select data-ng-model="field.type" title="Field type" data-uk-tooltip>
+                                               <input type="text" data-ng-model="field.name" placeholder="@lang('Field name')" pattern="[a-zA-Z0-9]+" required>
+                                               <select data-ng-model="field.type" title="@lang('Field type')" data-uk-tooltip>
                                                    <option value="text">Text</option>
                                                    <option value="select">Select</option>
                                                    <option value="boolean">Boolean</option>
                                                    <option value="html">Html</option>
                                                    <option value="wysiwyg">Html (WYSIWYG)</option>
                                                    <option value="code">Code</option>
+                                                   <option value="markdown">Markdown</option>
                                                    <option value="date">Date</option>
                                                    <option value="time">Time</option>
                                                    <option value="media">Media</option>
                                                </select>
 
-                                               <input type="text" data-ng-if="field.type=='select'" data-ng-model="field.options" ng-list placeholder="options....">
+                                               <input type="text" data-ng-if="field.type=='select'" data-ng-model="field.options" ng-list placeholder="@lang('options...')">
 
-                                               <select data-ng-if="field.type=='code'" data-ng-model="field.syntax" title="Code syntax" data-uk-tooltip>
+                                               <select data-ng-if="field.type=='code'" data-ng-model="field.syntax" title="@lang('Code syntax')" data-uk-tooltip>
                                                    <option value="text">Text</option>
                                                    <option value="css">CSS</option>
                                                    <option value="htmlmixed">Html</option>
@@ -153,6 +147,10 @@
                                               <textarea codearea="{mode:'@@field.syntax@@'}" class="uk-width-1-1 uk-form-large" data-ng-model="region.fields[$index].value" style="height:300px !important;"></textarea>
                                           </div>
 
+                                          <div data-ng-switch-when="markdown">
+                                              <markdown data-ng-model="region.fields[$index].value"></markdown>
+                                          </div>
+
                                           <div data-ng-switch-when="wysiwyg">
                                               <textarea wysiwyg="{document_base_url:'{{ $app->pathToUrl('site:') }}'}" class="uk-width-1-1 uk-form-large" data-ng-model="region.fields[$index].value"></textarea>
                                           </div>
@@ -171,6 +169,14 @@
                                               <input type="checkbox" data-ng-model="region.fields[$index].value">
                                           </div>
 
+                                          <div data-ng-switch-when="date">
+                                              <input class="uk-width-1-1 uk-form-large" type="text" data-uk-datepicker="{format:'YYYY-MM-DD'}" data-ng-model="region.fields[$index].value">
+                                          </div>
+
+                                          <div data-ng-switch-when="time">
+                                              <input class="uk-width-1-1 uk-form-large" type="text" data-uk-timepicker data-ng-model="region.fields[$index].value">
+                                          </div>
+
                                           <div data-ng-switch-default>
                                               <input class="uk-width-1-1 uk-form-large" type="text" data-ng-model="region.fields[$index].value">
                                           </div>
@@ -178,12 +184,6 @@
                                   </div>
 
 
-                              </div>
-                              <div class="uk-width-1-5">
-                                  <button type="button" class="uk-button uk-button-large uk-width-1-1" data-ng-class="manageform ? 'uk-button-success':'uk-button-primary'" data-ng-click="(manageform = !manageform)" title="@lang('Manage form')">
-                                      <span ng-show="!manageform"><i class="uk-icon-cog"></i></span>
-                                      <span ng-show="manageform"><i class="uk-icon-check"></i></span>
-                                  </button>
                               </div>
                             </div>
 
@@ -214,8 +214,7 @@
                               </div>
                             </div>
 
-
-                            <textarea id="region-template" codearea="{mode:'application/x-httpd-php', autoCloseTags: true, extraKeys: {'Ctrl-Space': 'htmlautocomplete'}}" class="uk-width-1-1 uk-form-large" style="height:450px !important;" placeholder="Region code" data-ng-model="region.tpl"  pattern="[a-zA-Z0-9]+"></textarea>
+                            <textarea id="region-template" codearea="{mode:'application/x-httpd-php', autoCloseTags: true}" class="uk-width-1-1 uk-form-large" style="height:450px !important;" placeholder="Region code" data-ng-model="region.tpl"  pattern="[a-zA-Z0-9]+"></textarea>
 
                             <div class="uk-margin" ng-show="region.name">
                                 <strong>@lang('Embed region snippet'):</strong>
@@ -234,8 +233,8 @@
 
                     <strong>@lang("Group")</strong>
                     <select class="uk-width-1-1" data-ng-model="region.group">
-                        <option value="">- @lang("No group") -</option>
                         <option ng-repeat="group in groups" value="@@ group @@">@@ group @@</option>
+                        <option value="">- @lang("No group") -</option>
                     </select>
                 </div>
           </div>
