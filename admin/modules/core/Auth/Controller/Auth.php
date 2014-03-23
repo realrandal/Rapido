@@ -13,15 +13,16 @@ class Auth extends \LimeExtra\Controller {
             $user = $this->module('auth')->authenticate($data);
 
             if($user) {
-                $this->module("auth")->setUser($user);
-            }
 
-            // log to history
-            $this->helper("history")->log([
-                "msg"  => "%s logged in",
-                "args" => [$user["name"] ? $user["name"]:$user["user"]],
-                "mod"  => "auth"
-            ]);
+                $this->module("auth")->setUser($user);
+
+                // log to history
+                $this->helper("history")->log([
+                    "msg"  => "%s logged in",
+                    "args" => [$user["name"] ? $user["name"]:$user["user"]],
+                    "mod"  => "auth"
+                ]);
+            }
 
             if($this->req_is('ajax')) {
                 return $user ? '{"success":1}' : '{"success":0}';
