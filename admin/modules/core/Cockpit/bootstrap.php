@@ -1,15 +1,15 @@
 <?php
 
 $app['app.assets.base'] = [
-    'assets:vendor/promise.js',
     'assets:vendor/jquery.js',
     'assets:vendor/angular.js',
     'assets:vendor/storage.js',
     'assets:vendor/i18n.js',
+
+    // UIkit
+    'cockpit:assets/css/uikit.cockpit.min.css',
     'assets:vendor/uikit/js/uikit.min.js',
-    'assets:vendor/uikit/css/uikit.min.css',
-    'assets:vendor/uikit/addons/notify/notify.min.js',
-    'assets:vendor/uikit/addons/notify/notify.almost-flat.min.css'
+    'assets:vendor/uikit/js/addons/notify.min.js'
 ];
 
 
@@ -27,7 +27,7 @@ $this->module("cockpit")->extend([
 
     "markdown" => function($content) use($app) {
 
-        return \Parsedown::instance()->parse($content);
+        return \Parsedown::instance()->text($content);
     },
 
     "get_registry" => function($key, $default=null) use($app) {
@@ -60,11 +60,22 @@ if (!function_exists('markdown')) {
 if (!function_exists('url_to')) {
 
     function url_to($path) {
-        echo cockpit()->pathToUrl($content);
+        echo cockpit()->pathToUrl($path);
     }
 
     function get_url_to($path) {
-        return cockpit()->pathToUrl($content);
+        return cockpit()->pathToUrl($path);
+    }
+}
+
+if (!function_exists('path_to')) {
+
+    function path_to($path) {
+        echo cockpit()->path($path);
+    }
+
+    function get_path_to($path) {
+        return cockpit()->path($path);
     }
 }
 
@@ -85,9 +96,12 @@ if (COCKPIT_ADMIN && !COCKPIT_REST) {
     $app["cockpit"] = json_decode($app->helper("fs")->read("#root:package.json"), true);
 
     $assets = array_merge([
+        'assets:vendor/uikit/js/addons/autocomplete.min.js',
+        'assets:vendor/uikit/js/addons/search.min.js',
+        'assets:vendor/uikit/js/addons/form-select.min.js',
+        'assets:vendor/multipleselect.js',
         'cockpit:assets/js/app.js',
         'cockpit:assets/js/app.module.js',
-        'cockpit:assets/css/app.less',
         'cockpit:assets/js/bootstrap.js',
     ], $app->retrieve('app.config/app.assets.backend', []));
 
@@ -115,7 +129,7 @@ if (COCKPIT_ADMIN && !COCKPIT_REST) {
     $app->bindClass("Cockpit\\Controller\\Backups", "backups");
 
     //global search
-    $app->bind("/cockpit-globsearch", function() use($app){
+    $app->bind("/cockpit-globalsearch", function() use($app){
 
         $query = $app->param("search", false);
         $list  = new \ArrayObject([]);

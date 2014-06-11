@@ -5,13 +5,13 @@
             @hasaccess?("Collections", 'manage.collections')
             <a class="uk-button uk-button-success uk-button-small" href="@route('/collections/collection')" title="@lang('Add collection')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-plus-circle"></i></a>
             @end
-            <a class="uk-button app-button-secondary uk-button-small" href="@route('/collections')" title="@lang('Show all collections')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-list"></i></a>
+            <a class="uk-button app-button-secondary uk-button-small" href="@route('/collections')" title="@lang('Show all collections')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-ellipsis-h"></i></a>
         </span>
     </div>
 
 
     <span class="uk-text-small uk-text-uppercase uk-text-muted">@lang('Latest')</span>
-    <ul class="uk-list uk-list-line">
+    <ul class="uk-list uk-list-space">
         @foreach($collections as $collection)
         <li><a href="@route('/collections/entries/'.$collection['_id'])"><i class="uk-icon-map-marker"></i> {{ $collection["name"] }}</a></li>
         @endforeach

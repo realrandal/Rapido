@@ -109,14 +109,14 @@
 
                 fields = $scope.collection.fields.filter(function(field){
 
-                    return (['text','html', 'markdown','code','wysiwyg','markdown', 'gallery'].indexOf(field.type) > -1);
+                    return (['text','html', 'markdown','code','wysiwyg','markdown','gallery','link-collection'].indexOf(field.type) > -1);
                 });
 
             }
 
             if(area=="side"){
                 fields = $scope.collection.fields.filter(function(field){
-                    return ['select','date','time','media', 'boolean'].indexOf(field.type) > -1;
+                    return ['select','date','time','media','boolean','tags','region'].indexOf(field.type) > -1;
                 });
             }
 

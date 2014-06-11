@@ -10,7 +10,7 @@
 
     var tpl = [
         '<div>',
-            '<div class="uk-grid uk-grid-small uk-grid-width-medium-1-5 uk-grid-width-1-3 gallery-list"></div>',
+            '<ul class="uk-grid uk-grid-small uk-grid-width-medium-1-5 uk-grid-width-1-3 gallery-list uk-sortable"></ul>',
             '<button class="uk-button uk-margin-top" type="button"><i class="uk-icon-plus-circle"></i></button>',
         '</div>'
     ].join('')
@@ -27,17 +27,17 @@
 
             var $gal = $(tpl),
                 $container = $gal.find('.uk-grid'),
-                images;
+                media;
 
             $gal.find(">button").on("click", function(){
                 new PathPicker(function(path){
 
-                    if(String(path).match(/\.(jpg|png|gif)$/i)){
+                    if(String(path).match(/\.(jpg|jpeg|png|gif|mp4|mpeg|webm|ogv|wmv)$/i)){
 
-                        images.push(path);
-                        App.notify(App.i18n.get("%s image(s) added", 1));
+                        media.push(path);
+                        App.notify(App.i18n.get("%s media file(s) added", 1));
                         updateSope();
-                        renderImages();
+                        rendermedia();
 
                     } else {
 
@@ -49,17 +49,17 @@
 
                                 data.files.forEach(function(file) {
 
-                                    if(file.name.match(/\.(jpg|png|gif)$/i)) {
-                                        images.push("site:"+site2media+'/'+file.path);
+                                    if(file.name.match(/\.(jpg|jpeg|png|gif|mp4|mpeg|webm|ogv|wmv)$/i)) {
+                                        media.push("site:"+site2media+'/'+file.path);
                                         count = count + 1;
                                     }
                                 });
 
                                 updateSope();
-                                renderImages();
+                                rendermedia();
                             }
 
-                            App.notify(App.i18n.get("%s image(s) added", count));
+                            App.notify(App.i18n.get("%s media file(s) added", count));
 
                         }, "json");
                     }
@@ -72,18 +72,24 @@
                 var ele = $(this);
 
                 App.Ui.confirm(App.i18n.get("Are you sure?"), function(){
-                    var item  = ele.closest('div[data-path]'),
+                    var item  = ele.closest('li[data-path]'),
                         index = $container.children().index(item);
 
-                    images.splice(index, 1);
-                    item.fadeOut(function(){ remove(); });
+                    media.splice(index, 1);
+                    item.fadeOut(function(){
+                        item.remove();
+
+                        if (!media.length) {
+                            rendermedia();
+                        }
+                    });
 
                     updateSope();
                 });
             });
 
 
-            App.assets.require(window.nativesortable ? []:['assets/vendor/nativesortable.js'], function(){
+            App.assets.require($.UIkit.sortable ? []:['assets/vendor/uikit/js/addons/sortable.min.js'], function(){
 
                 $container.on("dragend", "[draggable]",function(){
 
@@ -93,51 +99,62 @@
                         imgs.push($(this).data("path"));
                     });
 
-                    images = imgs;
+                    media = imgs;
 
                     updateSope()
 
                 });
 
-                nativesortable($container[0]);
+                $.UIkit.sortable($container);
+
             });
 
             ngModel.$render = function() {
 
-                if(!images) {
-                    images = ngModel.$viewValue || [];
+                if(!media) {
+                    media = ngModel.$viewValue || [];
                 }
 
                 setTimeout(function(){
-                    renderImages();
+                    rendermedia();
                 }, 10);
             };
 
             function updateSope() {
 
-                ngModel.$setViewValue(images);
+                ngModel.$setViewValue(media);
 
                 if (!scope.$root.$$phase) {
                     scope.$apply();
                 }
             }
 
-            function renderImages() {
+            function rendermedia() {
 
                 $container.empty();
 
-                if (images && images.length) {
-                    images.forEach(function(path, index){
+                var mediatpl;
+
+                if (media && media.length) {
+                    media.forEach(function(path, index){
+
+                        if(path.match(/\.(jpg|jpeg|png|gif|svg)$/i)) {
+                            mediatpl = '<img src="'+App.route("/mediamanager/thumbnail/"+btoa(path))+'/150/150">';
+                        }
+
+                        if(path.match(/\.(mp4|mpeg|ogv|webm|wmv)$/i)) {
+                            mediatpl = '<video src="'+path.replace("site:", COCKPIT_SITE_BASE_URL)+'" style="max-width:100%;height:auto;"></video>';
+                        }
 
                         $container.append([
-                            '<div class="uk-grid-margin" data-path="'+path+'" draggable="true">',
-                                '<div class="uk-thumbnail"><img src="'+App.route("/mediamanager/thumbnail/"+btoa(path))+'/150/150"></div>',
+                            '<li class="uk-grid-margin" data-path="'+path+'" draggable="true" title="'+path+'" stype="position:relative;">',
+                                '<div class="uk-thumbnail" style="min-height:180px;">'+mediatpl+'</div>',
                                 '<div class="gallery-list-actions"><button class="uk-button uk-button-small uk-button-danger js-remove" type="button"><i class="uk-icon-trash-o"></i></button></div>',
-                            '</div>'
+                            '</li>'
                         ].join(''));
                     });
                 } else {
-                    $container.append('<div class="uk-width-1-1 uk-grid-margin"><p class="uk-text-muted uk-text-small">'+App.i18n.get('No images')+'</p></div>');
+                    $container.append('<div class="uk-width-1-1 uk-grid-margin"><p class="uk-text-muted uk-text-small">'+App.i18n.get('No media files.')+'</p></div>');
                 }
             }
 

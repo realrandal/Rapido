@@ -1,171 +1,14 @@
 (function($){
 
-    function autocomplete(cm) {
-        var doc = cm.getDoc(),
-            cur = cm.getCursor(),
-            toc = cm.getTokenAt(cur),
-            mode = CodeMirror.innerMode(cm.getMode(), toc.state).mode.name;
-
-        if(!toc.string.trim()) return;
-
-        if (mode == 'xml') { //html depends on xml
-
-            if(toc.string.charAt(0) == "<" || toc.type == "attribute") {
-                CodeMirror.showHint(cm, CodeMirror.hint.html, {completeSingle:false});
-            }
-
-        } else if (mode == 'javascript') {
-            CodeMirror.showHint(cm, CodeMirror.hint.javascript, {completeSingle:false});
-        } else if (mode == 'css' || mode == 'less') {
-            CodeMirror.showHint(cm, CodeMirror.hint.css, {completeSingle:false});
-        } else {
-            CodeMirror.showHint(cm, CodeMirror.hint.anyword, {completeSingle:false});
-        }
-    };
-
-    var Editor = {
-
-        init: function($scope) {
-
-            if (this.element) {
-                return;
-            }
-
-            var $this = this;
-
-            this.scope   = $scope;
-
-            this.element = $("#mm-editor");
-            this.toolbar = this.element.find("nav");
-            this.code    = CodeMirror.fromTextArea(this.element.find("textarea")[0], {
-                               lineNumbers: true,
-                               styleActiveLine: true,
-                               matchBrackets: true,
-                               autoCloseBrackets: true,
-                               autoCloseTags: true,
-                               mode: 'text',
-                               theme: 'pastel-on-dark'
-                           });
-
-            this.filename = this.element.find(".filename");
-
-            this.code.on("inputRead", $.UIkit.Utils.debounce(function(){
-              autocomplete($this.code);
-            }, 200));
-
-            this.resize();
-
-            $(window).on("resize", $.UIkit.Utils.debounce(function(){
-                $this.resize();
-            }, 150));
-
-
-            this.element.on("click", "[data-editor-action]", function(){
-
-                switch($(this).data("editorAction")) {
-                    case "close":
-                        $this.close();
-                        break;
-                    case "save":
-                        $this.save();
-                        break;
-                }
-            });
-
-            // key mappings
-
-            this.code.addKeyMap({
-                'Ctrl-S': function(){ Editor.save(); },
-                'Cmd-S': function(){ Editor.save(); },
-                'Esc': function(){ Editor.close(); }
-            });
-        },
-
-        resize: function(){
-
-            if(!this.element.is(":visible")) {
-                return;
-            }
-
-            var wrap = this.code.getWrapperElement();
-
-            wrap.style.height = (this.element.height() - this.toolbar.height())+"px";
-            this.code.refresh();
-        },
-
-        save: function(){
-
-            if(!this.file) {
-                return;
-            }
-
-            if(!this.file.is_writable) {
-                App.notify(App.i18n.get("This file is not writable!"), "danger");
-                return;
-            }
-
-            this.scope.saveFile(this.file, this.code.getValue());
-        },
-
-        show: function(file, content){
-
-            var ext  = file.name.split('.').pop().toLowerCase(),
-                mode = "text";
-
-            switch(ext) {
-                case 'css':
-                case 'less':
-                case 'sql':
-                case 'xml':
-                case 'markdown':
-                    mode = ext;
-                    break;
-                case 'js':
-                case 'json':
-                    mode = 'javascript';
-                    break;
-                case 'md':
-                    mode = 'markdown';
-                    break;
-                case 'php':
-                    mode = 'application/x-httpd-php';
-                    break;
-                case "txt":
-                    mode = 'text';
-                    break;
-            }
-
-            Editor.code.setOption("mode", mode);
-
-            this.filename.text(file.name);
-
-            this.code.setValue(content);
-            this.code.getDoc().clearHistory();
-
-            this.element.show();
-            this.resize();
-
-            setTimeout(function(){
-                Editor.code.focus();
-            }, 50);
-
-            this.file = file;
-        },
-
-        close: function(){
-            this.file = null;
-            this.element.hide();
-        }
-    };
-
-
 
     App.module.controller("mediamanager", function($scope, $rootScope, $http, $timeout){
 
-            var currentpath = location.hash ? location.hash.replace("#", ''):"/",
+            var container   = $('[data-ng-controller="mediamanager"]'),
+                currentpath = location.hash ? location.hash.replace("#", ''):"/",
                 apiurl      = App.route('/mediamanager/api'),
 
-                imgpreview  = new $.UIkit.modal.Modal("#mm-image-preview");
+                imgpreview  = $.UIkit.modal("#mm-image-preview"),
+                dirlst      = [];
 
             $scope.dir;
             $scope.breadcrumbs = [];
@@ -175,6 +18,8 @@
             $scope.namefilter = '';
 
             $scope.mode       = 'table';
+            $scope.dirlist    = false;
+            $scope.selected   = {};
 
             $scope.updatepath = function(path) {
                 loadPath(path);
@@ -189,7 +34,7 @@
                         App.Ui.confirm(App.i18n.get("Are you sure?"), function() {
 
                             $timeout(function(){
-                                requestapi({"cmd":"removefiles", "paths": [item.path]});
+                                requestapi({"cmd":"removefiles", "paths": item.path});
 
                                 var index = $scope.dir[item.is_file ? "files":"folders"].indexOf(item);
                                 $scope.dir[item.is_file ? "files":"folders"].splice(index, 1);
@@ -262,7 +107,7 @@
                     case "text":
 
                         requestapi({"cmd":"readfile", "path": file.path}, function(content){
-                            Editor.show(file, content);
+                            MMEditor.show(file, content);
                         }, "text");
 
 
@@ -323,8 +168,10 @@
                     currentpath = path;
 
                     $scope.breadcrumbs = [];
+                    $scope.selected    = {};
+                    $scope.selectAll   = false;
 
-                    if(currentpath!='/'){
+                    if(currentpath && currentpath != '/' && currentpath != '.'){
                         var parts   = currentpath.split('/'),
                             tmppath = [],
                             crumbs  = [];
@@ -351,30 +198,103 @@
 
             loadPath(currentpath);
 
+
+            // fuzzy dirsearch
+            // - load async dirlist
+            setTimeout(function(){
+                requestapi({"cmd":"getfilelist"}, function(list){
+
+                    $timeout(function(){
+
+                        dirlst = list || [];
+                        $scope.dirlist = true;
+
+
+                        var dirsearch = $.UIkit.autocomplete('#dirsearch', {
+                            source: function(release) {
+                                var data = FuzzySearch.filter(dirlst, dirsearch.input.val(), {key:'path', maxResults: 10});
+
+                                release(data);
+                            },
+                            renderer: function(data) {
+
+                                if(data && data.length) {
+
+                                    var lst = $('<ul class="uk-nav uk-nav-autocomplete uk-autocomplete-results">'), li;
+
+                                    data.forEach(function(item){
+                                        li = $('<li><a><strong>'+item.name+'</strong><div class="uk-text-truncate">'+item.path+'</div></a></li>').data(item);
+                                        lst.append(li);
+                                    });
+
+                                    this.dropdown.append(lst);
+                                    this.show();
+                                }
+
+                            }
+                        });
+
+                        dirsearch.element.on('autocomplete-select', function(e, data){
+                            loadPath(data.dir);
+                            dirsearch.input.val('');
+                            $scope.open(data);
+                        });
+
+                    }, 0);
+                });
+            }, 0);
+
+            // upload
+
             var progessbar     = $('body').loadie(),
                 uploadsettings = {
-                    "action": apiurl,
-                    "single": true,
-                    "params": {"cmd":"upload"},
-                    "before": function(o) {
-                        o.params["path"] = currentpath;
+
+                    action: apiurl,
+                    params: {"cmd":"upload"},
+                    before: function(options) {
+                        options.params.path = currentpath;
                     },
-                    "loadstart": function(){
+                    loadstart: function() {
 
                     },
-                    "progress": function(percent){
-                        progessbar.loadie(percent/100);
+                    progress: function(percent) {
+                        progessbar.loadie(Math.ceil(percent)/100);
                     },
-                    "allcomplete": function(){
-                        loadPath(currentpath);
-                    },
-                    "complete": function(res){
+                    allcomplete: function(response) {
 
+                        if(response && response.length) {
+                            App.notify(App.i18n.get("File(s) uploaded."), "success");
+                            loadPath(currentpath);
+                        } else {
+                            App.module.callbacks.error.http();
+                        }
                     }
-                };
+            };
 
-            $("body").uploadOnDrag(uploadsettings);
-            $("#frmMediaUpload").ajaxform(uploadsettings);
+            var uploadselect = new $.UIkit.uploadSelect($('#js-upload-select'), uploadsettings);
+
+            $("body").on("drop", function(e){
+
+                if (e.dataTransfer && e.dataTransfer.files) {
+
+                    e.stopPropagation();
+                    e.preventDefault();
+
+                    $.UIkit.Utils.xhrupload(e.dataTransfer.files, uploadsettings);
+                }
+
+            }).on("dragenter", function(e){
+                    e.stopPropagation();
+                    e.preventDefault();
+            }).on("dragover", function(e){
+                    e.stopPropagation();
+                    e.preventDefault();
+            }).on("dragleave", function(e){
+                    e.stopPropagation();
+                    e.preventDefault();
+            });
+
+            // bookmarks
 
             $("#mmbookmarks").on("dragend", "a[draggable]", function(e){
                 e.stopPropagation();
@@ -395,7 +315,57 @@
                 });
             });
 
-            Editor.init($scope);
+            // batch delete
+
+            $scope.selectAll       = false;
+
+            $scope.selectAllToggle = function() {
+                $scope.dir.files.forEach(function(file){
+                    $scope.selected[file.path] = $scope.selectAll;
+                });
+                $scope.dir.folders.forEach(function(folder){
+                    $scope.selected[folder.path] = $scope.selectAll;
+                });
+            };
+
+            $scope.deleteSelected  = function() {
+
+                var paths = getSelectedPaths();
+
+                if (paths.length) {
+
+                    App.Ui.confirm(App.i18n.get("Are you sure?"), function() {
+
+                        requestapi({"cmd":"removefiles", "paths": paths}, function(){
+
+                            loadPath(currentpath);
+                            App.notify("File(s) deleted", "success");
+                        });
+                    });
+                }
+            };
+
+            $scope.hasSelected = function() {
+                return getSelectedPaths().length;
+            };
+
+            function getSelectedPaths() {
+
+                var paths = [];
+
+                Object.keys($scope.selected).forEach(function(path){
+                    if($scope.selected[path]===true) {
+                        paths.push(path);
+                    }
+                });
+
+                return paths;
+            }
+
+
+            App.assets.require(['modules/core/Mediamanager/assets/Editor.js'], function(){
+                MMEditor.init($scope);
+            });
 
     });
 

@@ -7,7 +7,7 @@ class Mediamanager extends \Cockpit\Controller {
 	protected $root;
 
 	public function index(){
-		
+
         if(!$this->app->module("auth")->hasaccess("Mediamanager","manage")) return false;
 
         return $this->render("mediamanager:views/index.php");
@@ -36,7 +36,7 @@ class Mediamanager extends \Cockpit\Controller {
     public function api() {
 
         $cmd       = $this->param("cmd", false);
-        $mediapath = trim($this->module("auth")->get_group_setting("media.path", '/'), '/');
+        $mediapath = trim($this->module("auth")->getGroupSetting("media.path", '/'), '/');
 
         $this->root = rtrim($this->app->path("site:{$mediapath}"), '/');
 
@@ -89,10 +89,11 @@ class Mediamanager extends \Cockpit\Controller {
 
     protected function upload() {
 
-        $files      = isset($_FILES['files']) ? $_FILES['files'] : array();
+        $files      = isset($_FILES['files']) ? $_FILES['files'] : [];
         $path       = $this->param('path', false);
         $targetpath = $this->root.'/'.trim($path, '/');
-        $uploaded   = array();
+        $uploaded   = [];
+
 
         if (isset($files['name']) && $path && file_exists($targetpath)) {
             for ($i = 0; $i < count($files['name']); $i++) {
@@ -134,7 +135,7 @@ class Mediamanager extends \Cockpit\Controller {
 
     protected function removefiles() {
 
-        $paths = $this->param('paths', array());
+        $paths = (array)$this->param('paths', array());
 
         foreach ($paths as $path) {
 
@@ -230,6 +231,40 @@ class Mediamanager extends \Cockpit\Controller {
         readfile($file);
 
         $this->app->stop();
+    }
+
+    protected function getfilelist() {
+
+        $list = [];
+        $toignore = [
+            '\.svn', '_svn', 'cvs', '_darcs', '\.arch-params', '\.monotone', '\.bzr', '\.git', '\.hg', '\.ds_store', '\.thumb', '\/cache'
+        ];
+
+        $toignore = '/('.implode('|',$toignore).')/i';
+
+        foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->root)) as $file) {
+
+            if($file->isDir()) continue;
+
+            $filename = $file->getFilename();
+
+            if($filename[0]=='.' || preg_match($toignore, $file->getPathname())) continue;
+
+            $path = trim(str_replace(['\\', $this->root], ['/',''], $file->getPathname()), '/');
+
+            $list[] = [
+                "is_file" => true,
+                "is_dir" => false,
+                "is_writable" => is_writable($file->getPathname()),
+                "name" => $filename,
+                "path" => $path,
+                "dir" => dirname($path),
+                "is_writable" => is_writable($file->getPathname()),
+                "url"  => $this->app->pathToUrl($file->getPathname()),
+            ];
+        }
+
+        return json_encode($list);
     }
 
     public function savebookmarks() {

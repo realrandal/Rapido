@@ -22,7 +22,7 @@ class Api extends \Cockpit\Controller {
             }
         }
 
-        return json_encode($docs);
+        return json_encode($docs->toArray());
     }
 
     public function findOne(){
@@ -77,15 +77,20 @@ class Api extends \Cockpit\Controller {
             $col     = "collection".$collection["_id"];
             $options = [];
 
-            if($filter = $this->param("filter", null)) $options["filter"] = $filter;
-            if($limit  = $this->param("limit", null))  $options["limit"] = $limit;
-            if($sort   = $this->param("sort", null))   $options["sort"] = $sort;
-            if($skip   = $this->param("skip", null))   $options["skip"] = $skip;
+            if($collection["sortfield"] && $collection["sortorder"]) {
+                $options["sort"] = [];
+                $options["sort"][$collection["sortfield"]] = $collection["sortorder"];
+            }
+
+            if($filter = $this->param("filter", null)) $options["filter"] = is_string($filter) ? json_decode($filter, true) : $filter;
+            if($limit  = $this->param("limit", null))  $options["limit"]  = $limit;
+            if($sort   = $this->param("sort", null))   $options["sort"]   = $sort;
+            if($skip   = $this->param("skip", null))   $options["skip"]   = $skip;
 
             $entries = $this->app->db->find("collections/{$col}", $options);
         }
 
-        return json_encode($entries);
+        return json_encode($entries->toArray());
     }
 
     public function removeentry(){
@@ -194,5 +199,19 @@ class Api extends \Cockpit\Controller {
         return false;
     }
 
+    public function export($collectionId) {
 
+        if (!$this->app->module("auth")->hasaccess("Collections", 'manage.collections')) {
+            return false;
+        }
+
+        $collection = $this->app->db->findOneById("common/collections", $collectionId);
+
+        if (!$collection) return false;
+
+        $col     = "collection".$collection["_id"];
+        $entries = $this->app->db->find("collections/{$col}");
+
+        return json_encode($entries, JSON_PRETTY_PRINT);
+    }
 }

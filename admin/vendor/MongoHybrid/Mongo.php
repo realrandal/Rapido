@@ -64,7 +64,7 @@ class Mongo {
 
         if($limit) $cursor->limit($limit);
         if($sort)  $cursor->sort($sort);
-        if($skip)  $cursor->sort($skip);
+        if($skip)  $cursor->skip($skip);
 
         $docs = array_values(iterator_to_array($cursor));
 
@@ -72,7 +72,9 @@ class Mongo {
             if(isset($doc["_id"])) $doc["_id"] = (string) $doc["_id"];
         }
 
-        return $docs;
+        $resultSet = new ResultSet($this, $docs);
+
+        return $resultSet;
     }
 
     public function insert($collection, &$doc) {

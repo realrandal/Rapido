@@ -4,7 +4,6 @@
 
         var id = $("[data-ng-controller='collection']").data("id");
 
-
         if(id) {
 
             $http.post(App.route("/api/collections/findOne"), {filter: {"_id":id}}, {responseType:"json"}).success(function(data){
@@ -24,6 +23,13 @@
                 sortorder: "-1"
             };
         }
+
+        $scope.collections = [];
+
+        $http.post(App.route("/api/collections/find"), {}).success(function(data){
+
+            $scope.collections = data;
+        });
 
         $scope.addfield = function(){
 
@@ -63,10 +69,15 @@
             }).error(App.module.callbacks.error.http);
         };
 
+        $scope.getSortFields = function() {
+
+            return [{'name':'created'}, {'name':'modified'}].concat($scope.collection && $scope.collection.fields ? angular.copy($scope.collection.fields):[]);
+        }
+
         // after sorting list
         $(function(){
 
-            var list = $("#fields-list").on("sortable-change", function(){
+            var list = $("#fields-list").on("nestable-change", function(){
                 var fields = [];
 
                 list.children().each(function(){

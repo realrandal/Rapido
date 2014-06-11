@@ -5,12 +5,12 @@
             @hasaccess?("Regions", 'create.regions')
             <a class="uk-button uk-button-success uk-button-small" href="@route('/regions/region')" title="@lang('Add region')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-plus-circle"></i></a>
             @end
-            <a class="uk-button app-button-secondary uk-button-small" href="@route('/regions')" title="@lang('Show all regions')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-list"></i></a>
+            <a class="uk-button app-button-secondary uk-button-small" href="@route('/regions')" title="@lang('Show all regions')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-ellipsis-h"></i></a>
         </span>
     </div>
 
     <span class="uk-text-small uk-text-uppercase uk-text-muted">@lang('Latest')</span>
-    <ul class="uk-list uk-list-line">
+    <ul class="uk-list uk-list-space">
         @foreach($regions as $region)
         <li><a href="@route('/regions/region/'.$region['_id'])"><i class="uk-icon-map-marker"></i> {{ $region["name"] }}</a></li>
         @endforeach

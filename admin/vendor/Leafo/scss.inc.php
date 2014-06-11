@@ -43,7 +43,7 @@
  * @author Leaf Corcoran <leafot@gmail.com>
  */
 class scssc {
-	static public $VERSION = "v0.0.9";
+	static public $VERSION = "v0.0.10";
 
 	static protected $operatorNames = array(
 		'+' => "add",
@@ -318,35 +318,40 @@ class scssc {
 
 	protected function compileMedia($media) {
 		$this->pushEnv($media);
-		$parentScope = $this->mediaParent($this->scope);
 
-		$this->scope = $this->makeOutputBlock("media", array(
-			$this->compileMediaQuery($this->multiplyMedia($this->env)))
-		);
+		$mediaQuery = $this->compileMediaQuery($this->multiplyMedia($this->env));
 
-		$parentScope->children[] = $this->scope;
+		if (!empty($mediaQuery)) {
 
-		// top level properties in a media cause it to be wrapped
-		$needsWrap = false;
-		foreach ($media->children as $child) {
-			$type = $child[0];
-			if ($type !== 'block' && $type !== 'media' && $type !== 'directive') {
-				$needsWrap = true;
-				break;
+			$this->scope = $this->makeOutputBlock("media", array($mediaQuery));
+
+			$parentScope = $this->mediaParent($this->scope);
+
+			$parentScope->children[] = $this->scope;
+
+			// top level properties in a media cause it to be wrapped
+			$needsWrap = false;
+			foreach ($media->children as $child) {
+				$type = $child[0];
+				if ($type !== 'block' && $type !== 'media' && $type !== 'directive') {
+					$needsWrap = true;
+					break;
+				}
 			}
+
+			if ($needsWrap) {
+				$wrapped = (object)array(
+					"selectors" => array(),
+					"children" => $media->children
+				);
+				$media->children = array(array("block", $wrapped));
+			}
+
+			$this->compileChildren($media->children, $this->scope);
+
+			$this->scope = $this->scope->parent;
 		}
 
-		if ($needsWrap) {
-			$wrapped = (object)array(
-				"selectors" => array(),
-				"children" => $media->children
-			);
-			$media->children = array(array("block", $wrapped));
-		}
-
-		$this->compileChildren($media->children, $this->scope);
-
-		$this->scope = $this->scope->parent;
 		$this->popEnv();
 	}
 
@@ -492,7 +497,7 @@ class scssc {
 	protected function compileChildren($stms, $out) {
 		foreach ($stms as $stm) {
 			$ret = $this->compileChild($stm, $out);
-			if (!is_null($ret)) return $ret;
+			if (isset($ret)) return $ret;
 		}
 	}
 
@@ -500,11 +505,19 @@ class scssc {
 		$out = "@media";
 		$first = true;
 		foreach ($queryList as $query){
+			$type = null;
 			$parts = array();
 			foreach ($query as $q) {
 				switch ($q[0]) {
 					case "mediaType":
-						$parts[] = implode(" ", array_map(array($this, "compileValue"), array_slice($q, 1)));
+						if ($type) {
+							$type = $this->mergeMediaTypes($type, array_map(array($this, "compileValue"), array_slice($q, 1)));
+							if (empty($type)) { // merge failed
+								return null;
+							}
+						} else {
+							$type = array_map(array($this, "compileValue"), array_slice($q, 1));
+						}
 						break;
 					case "mediaExp":
 						if (isset($q[2])) {
@@ -514,6 +527,9 @@ class scssc {
 						}
 						break;
 				}
+			}
+			if ($type) {
+				array_unshift($parts, implode(' ', array_filter($type)));
 			}
 			if (!empty($parts)) {
 				if ($first) {
@@ -526,6 +542,50 @@ class scssc {
 			}
 		}
 		return $out;
+	}
+
+	protected function mergeMediaTypes($type1, $type2) {
+		if (empty($type1)) {
+			return $type2;
+		}
+		if (empty($type2)) {
+			return $type1;
+		}
+		$m1 = '';
+		$t1 = '';
+		if (count($type1) > 1) {
+			$m1= strtolower($type1[0]);
+			$t1= strtolower($type1[1]);
+		} else {
+			$t1 = strtolower($type1[0]);
+		}
+		$m2 = '';
+		$t2 = '';
+		if (count($type2) > 1) {
+			$m2 = strtolower($type2[0]);
+			$t2 = strtolower($type2[1]);
+		} else {
+			$t2 = strtolower($type2[0]);
+		}
+		if (($m1 == 'not') ^ ($m2 == 'not')) {
+			if ($t1 == $t2) {
+				return null;
+			}
+			return array(
+				$m1 == 'not' ? $m2 : $m1,
+				$m1 == 'not' ? $t2 : $t1
+			);
+		} elseif ($m1 == 'not' && $m2 == 'not') {
+			# CSS has no way of representing "neither screen nor print"
+			if ($t1 != $t2) {
+				return null;
+			}
+			return array('not', $t1);
+		} elseif ($t1 != $t2) {
+			return null;
+		} else { // t1 == t2, neither m1 nor m2 are "not"
+			return array(empty($m1)? $m2 : $m1, $t1);
+		}
 	}
 
 	// returns true if the value was something that could be imported
@@ -718,12 +778,12 @@ class scssc {
 				$this->env->depth--;
 			}
 
-			if (!is_null($content)) {
+			if (isset($content)) {
 				$content->scope = $callingScope;
 				$this->setRaw(self::$namespaces["special"] . "content", $content);
 			}
 
-			if (!is_null($mixin->args)) {
+			if (isset($mixin->args)) {
 				$this->applyArguments($mixin->args, $argValues);
 			}
 
@@ -736,7 +796,7 @@ class scssc {
 			break;
 		case "mixin_content":
 			$content = $this->get(self::$namespaces["special"] . "content");
-			if (is_null($content)) {
+			if (!isset($content)) {
 				$this->throwError("Expected @content inside of mixin");
 			}
 
@@ -870,7 +930,7 @@ class scssc {
 						$out = $this->$fn($left, $right, $shouldEval);
 					}
 
-					if (!is_null($out)) {
+					if (isset($out)) {
 						if ($unitChange && $out[0] == "number") {
 							$out = $this->coerceUnit($out, $targetUnit);
 						}
@@ -946,7 +1006,7 @@ class scssc {
 					$ret = $this->compileChildren($func->children, $tmp);
 					$this->popEnv();
 
-					return is_null($ret) ? self::$defaultValue : $ret;
+					return !isset($ret) ? self::$defaultValue : $ret;
 				}
 
 				// built in function
@@ -1323,7 +1383,7 @@ class scssc {
 	}
 
 	protected function multiplyMedia($env, $childQueries = null) {
-		if (is_null($env) ||
+		if (!isset($env) ||
 			!empty($env->block->type) && $env->block->type != "media")
 		{
 			return $childQueries;
@@ -1353,11 +1413,11 @@ class scssc {
 
 	// convert something to list
 	protected function coerceList($item, $delim = ",") {
-		if (!is_null($item) && $item[0] == "list") {
+		if (isset($item) && $item[0] == "list") {
 			return $item;
 		}
 
-		return array("list", $delim, is_null($item) ? array(): array($item));
+		return array("list", $delim, !isset($item) ? array(): array($item));
 	}
 
 	protected function applyArguments($argDef, $argValues) {
@@ -1460,9 +1520,9 @@ class scssc {
 	}
 
 	protected function setExisting($name, $value, $env = null) {
-		if (is_null($env)) $env = $this->getStoreEnv();
+		if (!isset($env)) $env = $this->getStoreEnv();
 
-		if (isset($env->store[$name]) || is_null($env->parent)) {
+		if (isset($env->store[$name]) || !isset($env->parent)) {
 			$env->store[$name] = $value;
 		} else {
 			$this->setExisting($name, $value, $env->parent);
@@ -1477,8 +1537,8 @@ class scssc {
 	public function get($name, $defaultValue = null, $env = null) {
 		$name = $this->normalizeName($name);
 
-		if (is_null($env)) $env = $this->getStoreEnv();
-		if (is_null($defaultValue)) $defaultValue = self::$defaultValue;
+		if (!isset($env)) $env = $this->getStoreEnv();
+		if (!isset($defaultValue)) $defaultValue = self::$defaultValue;
 
 		if (isset($env->store[$name])) {
 			return $env->store[$name];
@@ -1588,9 +1648,8 @@ class scssc {
 		$name = $this->normalizeName($name);
 		$libName = "lib_".$name;
 		$f = array($this, $libName);
-		$prototype = isset(self::$$libName) ? self::$$libName : null;
-
 		if (is_callable($f)) {
+			$prototype = isset(self::$$libName) ? self::$$libName : null;
 			$sorted = $this->sortArgs($prototype, $args);
 			foreach ($sorted as &$val) {
 				$val = $this->reduce($val, true);
@@ -1639,7 +1698,7 @@ class scssc {
 			}
 		}
 
-		if (is_null($prototype)) return $posArgs;
+		if (!isset($prototype)) return $posArgs;
 
 		$finalArgs = array();
 		foreach ($prototype as $i => $names) {
@@ -1746,7 +1805,7 @@ class scssc {
 		if ($min == $max) {
 			$s = $h = 0;
 		} else {
-		        $d = $max - $min;
+			$d = $max - $min;
 
 			if ($l < 255)
 				$s = $d / $l;
@@ -1808,7 +1867,7 @@ class scssc {
 	protected static $lib_if = array("condition", "if-true", "if-false");
 	protected function lib_if($args) {
 		list($cond,$t, $f) = $args;
-		if ($cond == self::$false) return $f;
+		if (!$this->isTruthy($cond)) return $f;
 		return $t;
 	}
 
@@ -1837,7 +1896,7 @@ class scssc {
 		"green", "blue", "alpha");
 	protected function lib_rgba($args) {
 		if ($color = $this->coerceColor($args[0])) {
-			$num = is_null($args[1]) ? $args[3] : $args[1];
+			$num = !isset($args[1]) ? $args[3] : $args[1];
 			$alpha = $this->assertNumber($num);
 			$color[4] = $alpha;
 			return $color;
@@ -1852,7 +1911,7 @@ class scssc {
 		$color = $this->assertColor($args[0]);
 
 		foreach (array(1,2,3,7) as $i) {
-			if (!is_null($args[$i])) {
+			if (isset($args[$i])) {
 				$val = $this->assertNumber($args[$i]);
 				$ii = $i == 7 ? 4 : $i; // alpha
 				$color[$ii] =
@@ -1860,10 +1919,10 @@ class scssc {
 			}
 		}
 
-		if (!is_null($args[4]) || !is_null($args[5]) || !is_null($args[6])) {
+		if (isset($args[4]) || isset($args[5]) || isset($args[6])) {
 			$hsl = $this->toHSL($color[1], $color[2], $color[3]);
 			foreach (array(4,5,6) as $i) {
-				if (!is_null($args[$i])) {
+				if (isset($args[$i])) {
 					$val = $this->assertNumber($args[$i]);
 					$hsl[$i - 3] = $this->$fn($hsl[$i - 3], $val, $i);
 				}
@@ -1981,7 +2040,7 @@ class scssc {
 		$first = $this->assertColor($first);
 		$second = $this->assertColor($second);
 
-		if (is_null($weight)) {
+		if (!isset($weight)) {
 			$weight = 0.5;
 		} else {
 			$weight = $this->coercePercent($weight);
@@ -2256,7 +2315,7 @@ class scssc {
 	}
 
 	protected function listSeparatorForJoin($list1, $sep) {
-		if (is_null($sep)) return $list1[1];
+		if (!isset($sep)) return $list1[1];
 		switch ($this->compileValue($sep)) {
 		case "comma":
 			return ",";
@@ -2810,7 +2869,7 @@ class scss_parser {
 			}
 
 			$last = $this->last();
-			if (!is_null($last) && $last[0] == "if") {
+			if (isset($last) && $last[0] == "if") {
 				list(, $if) = $last;
 				if ($this->literal("@else")) {
 					if ($this->literal("{")) {
@@ -2964,7 +3023,7 @@ class scss_parser {
 	}
 
 	protected function literal($what, $eatWhitespace = null) {
-		if (is_null($eatWhitespace)) $eatWhitespace = $this->eatWhiteDefault;
+		if (!isset($eatWhitespace)) $eatWhitespace = $this->eatWhiteDefault;
 
 		// shortcut on single letter
 		if (!isset($what[1]) && isset($this->buffer[$this->count])) {
@@ -3893,7 +3952,7 @@ class scss_parser {
 	}
 
 	public function throwParseError($msg = "parse error", $count = null) {
-		$count = is_null($count) ? $this->count : $count;
+		$count = !isset($count) ? $this->count : $count;
 
 		$line = $this->getLineNo($count);
 
@@ -3928,7 +3987,7 @@ class scss_parser {
 		$token = null;
 
 		$end = strpos($this->buffer, "\n", $this->count);
-		if ($end === false) {
+		if ($end === false || $this->buffer[$end - 1] == '\\' || $this->buffer[$end - 2] == '\\' && $this->buffer[$end - 1] == "\r") {
 			$end = strlen($this->buffer);
 		}
 
@@ -3958,7 +4017,7 @@ class scss_parser {
 
 	// try to match something on head of buffer
 	protected function match($regex, &$out, $eatWhitespace = null) {
-		if (is_null($eatWhitespace)) $eatWhitespace = $this->eatWhiteDefault;
+		if (!isset($eatWhitespace)) $eatWhitespace = $this->eatWhiteDefault;
 
 		$r = '/'.$regex.'/Ais';
 		if (preg_match($r, $this->buffer, $out, null, $this->count)) {
@@ -3986,7 +4045,7 @@ class scss_parser {
 	}
 
 	protected function peek($regex, &$out, $from=null) {
-		if (is_null($from)) $from = $this->count;
+		if (!isset($from)) $from = $this->count;
 
 		$r = '/'.$regex.'/Ais';
 		$result = preg_match($r, $this->buffer, $out, null, $from);
@@ -4355,14 +4414,14 @@ class scss_server {
 	public function __construct($dir, $cacheDir=null, $scss=null) {
 		$this->dir = $dir;
 
-		if (is_null($cacheDir)) {
+		if (!isset($cacheDir)) {
 			$cacheDir = $this->join($dir, 'scss_cache');
 		}
 
 		$this->cacheDir = $cacheDir;
 		if (!is_dir($this->cacheDir)) mkdir($this->cacheDir, 0755, true);
 
-		if (is_null($scss)) {
+		if (!isset($scss)) {
 			$scss = new scssc();
 			$scss->setImportPaths($this->dir);
 		}

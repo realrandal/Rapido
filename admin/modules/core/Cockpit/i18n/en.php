@@ -55,6 +55,7 @@ return [
     'Authenticate Please!' => '',
     'Authenticate' => '',
     'Login failed' => '',
+    'Welcome back!' => '',
 
     // Accounts
     'Account'  => '',
@@ -115,6 +116,9 @@ return [
     'Add entry' => '',
     'Edit entry' => '',
     'Delete entry' => '',
+    'Filter entries...' => '',
+    'Reset filter' => '',
+    'No entries found.' => '',
     'This field is required.' => '',
     'It seems you don\'t have any fields created.' => '',
     'Field name' => '',
@@ -135,6 +139,7 @@ return [
     'Collection saved!' => '',
     'Entry removed' => '',
     'Entry saved!' => '',
+    'Load more...' => '',
 
     // Mediamanager
     'Mediamanager' => '',
@@ -143,6 +148,7 @@ return [
     'Folder' => '',
     'Files' => '',
     'File' => '',
+    'Upload files' => '',
     'You have nothing bookmarked.' => '',
     'Table mode' => '',
     'List mode' => '',
@@ -162,6 +168,7 @@ return [
     'Size' => '',
     'Last modified' => '',
     'This folder is empty.' => '',
+    'File(s) uploaded.' => '',
     'Save file' => '',
     'Close file' => '',
     'Do you really want to remove %s ?' => '',
@@ -173,6 +180,8 @@ return [
     'Do you really want to remove %s ?' => '',
     'Please enter a name:' => '',
     'Please enter a filename:' => '',
+    'Nothing selected' => '',
+    'Find files...' => '',
 
     // Regions
     'Regions' => '',
@@ -239,12 +248,11 @@ return [
     'Form data' => '',
 
     // Galleries
-
     'Galleries' => '',
     'Gallery' => '',
     'You don\'t have any galleries created.' => '',
     'All galleries' => '',
-    'Add gallerie' => '',
+    'Add gallery' => '',
     'Create a gallery' => '',
     'Edit gallery' => '',
     'Delete gallery' => '',

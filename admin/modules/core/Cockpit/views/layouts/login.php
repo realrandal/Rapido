@@ -7,13 +7,14 @@
     <link rel="icon" href="@base("/favicon.ico")" type="image/x-icon">
 
     @assets($app['app.assets.base'], 'app.base', 'cache:assets', 30, $app['cockpit/version'])
-    @assets(['assets:vendor/uikit/addons/form-password/form-password.min.js','assets:vendor/uikit/addons/form-password/form-password.min.css','cockpit:assets/css/login.less'], 'app.login', 'cache:assets', 360, $app['cockpit/version'])
+    {{ $app->assets(['assets:vendor/uikit/js/addons/form-password.min.js'], $app['cockpit/version']) }}
 
     <script>
         $(function(){
 
             var loginbox  = $(".app-login-box"),
                 container = loginbox.find(".app-login-box-container"),
+                profile   = $("#profile"),
                 form      = $("form").on("submit", function(e){
                                 e.preventDefault();
 
@@ -23,12 +24,27 @@
 
                                     setTimeout(function(){
 
-                                        if(data && data.success) {
-                                            location.href = $("html").data("route");
-                                        }else{
+                                        loginbox.removeClass("app-loading");
+                                        container.removeClass("uk-animation-shake");
 
-                                            loginbox.removeClass("app-loading");
-                                            container.removeClass("uk-animation-shake");
+                                        if(data && data.success) {
+
+                                            form.hide();
+                                            profile.find("img").attr("src", "http://www.gravatar.com/avatar/"+data.avatar+"?d=mm&s=60");
+                                            profile.find("span").html(data.user.name);
+                                            profile.removeClass('uk-hidden');
+
+                                            setTimeout(function(){
+
+                                                container.addClass("uk-animation-slide-top uk-animation-reverse").width();
+
+                                                setTimeout(function(){
+                                                    location.href = $("html").data("route");
+                                                }, 500);
+
+                                            }, 550);
+
+                                        }else{
 
                                             setTimeout(function(){
                                                 container.addClass("uk-animation-shake");
@@ -47,11 +63,13 @@
     <div>
         <div class="uk-animation-fade app-login-box">
             <div class="app-login-box-container">
-                <p class="uk-text-center uk-margin-large-bottom app-login-logo" style="position:relative;">
-                    <i class="uk-icon-spinner uk-icon-spin"></i>
-                    <img src="@base('/assets/images/cockpit.png')" width="50" height="50" alt="logo">
-                </p>
+
                 <form class="uk-form" method="post" action="@route('/auth/check')">
+
+                    <p class="uk-text-center uk-margin-large-bottom app-login-logo" style="position:relative;">
+                        <i class="uk-icon-spinner uk-icon-spin"></i>
+                        <img src="@base('/assets/images/cockpit.png')" width="50" height="50" alt="logo">
+                    </p>
 
                     <div class="uk-form-row">
 
@@ -68,6 +86,12 @@
                         <button class="uk-button uk-button-large uk-button-primary uk-width-1-1">@lang('Authenticate')</button>
                     </div>
                 </form>
+                <div id="profile" class="uk-text-center uk-animation-fade uk-hidden">
+                    <p>
+                        <div class="uk-thumbnail uk-rounded"><img alt="avatar" width="60" height="60" style="width:60px;height:60px;"></div>
+                    </p>
+                    <p class="uk-text-large"><strong>@lang('Welcome back!')</strong></p>
+                </div>
             </div>
         </div>
     </div>

@@ -5,12 +5,12 @@
             @hasaccess?("Forms", 'manage.forms')
             <a class="uk-button uk-button-success uk-button-small" href="@route('/forms/form')" title="@lang('Add form')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-plus-circle"></i></a>
             @end
-            <a class="uk-button app-button-secondary uk-button-small" href="@route('/forms')" title="@lang('Show all forms')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-list"></i></a>
+            <a class="uk-button app-button-secondary uk-button-small" href="@route('/forms')" title="@lang('Show all forms')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-ellipsis-h"></i></a>
         </span>
     </div>
 
     <span class="uk-text-small uk-text-uppercase uk-text-muted">@lang('Latest')</span>
-    <ul class="uk-list uk-list-line">
+    <ul class="uk-list uk-list-space">
         @foreach($forms as $form)
         <li><a href="@route('/forms/entries/'.$form['_id'])"><i class="uk-icon-map-marker"></i> {{ $form["name"] }}</a></li>
         @endforeach

@@ -1,8 +1,7 @@
 {{ $app->assets(['collections:assets/collections.js','collections:assets/js/entry.js'], $app['cockpit/version']) }}
 
-{{ $app->assets(['assets:vendor/uikit/addons/timepicker/timepicker.min.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/uikit/addons/datepicker/datepicker.min.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/uikit/addons/datepicker/datepicker.almost-flat.min.css'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:vendor/uikit/js/addons/timepicker.min.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:vendor/uikit/js/addons/datepicker.min.js'], $app['cockpit/version']) }}
 
 {{ $app->assets(['assets:vendor/codemirror/codemirror.js','assets:vendor/codemirror/codemirror.css','assets:vendor/codemirror/pastel-on-dark.css'], $app['cockpit/version']) }}
 {{ $app->assets(['assets:angular/directives/codearea.js'], $app['cockpit/version']) }}
@@ -10,15 +9,18 @@
 {{ $app->assets(['assets:vendor/tinymce/tinymce.min.js'], $app['cockpit/version']) }}
 {{ $app->assets(['assets:vendor/tinymce/langs/'.$app("i18n")->locale.'.js'], $app['cockpit/version']) }}
 
-{{ $app->assets(['assets:vendor/uikit/addons/markdownarea/markdownarea.almost-flat.min.css','assets:vendor/uikit/addons/markdownarea/markdownarea.min.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:vendor/uikit/js/addons/htmleditor.min.js'], $app['cockpit/version']) }}
 {{ $app->assets(['assets:vendor/marked.js'], $app['cockpit/version']) }}
 
 
 {{ $app->assets(['assets:angular/directives/wysiwyg.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:angular/directives/markdownarea.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:angular/directives/htmleditor.js'], $app['cockpit/version']) }}
 {{ $app->assets(['assets:angular/directives/gallery.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:angular/directives/tags.js'], $app['cockpit/version']) }}
 
 {{ $app->assets(['mediamanager:assets/pathpicker.directive.js'], $app['cockpit/version']) }}
+{{ $app->assets(['regions:assets/regionpicker.directive.js'], $app['cockpit/version']) }}
+{{ $app->assets(['collections:assets/linkcollection.directive.js'], $app['cockpit/version']) }}
 
 <style>
     textarea { min-height: 150px; }
@@ -29,27 +31,31 @@
      COLLECTION_ENTRY = {{ json_encode($entry) }};
 </script>
 
-<div data-ng-controller="entry">
+<div data-ng-controller="entry" ng-cloak>
 
     <div id="entry-versions" class="uk-offcanvas">
         <div class="uk-offcanvas-bar">
           <div class="uk-panel">
-              <h3 class="uk-panel-title">@lang('Versions')</h3>
 
-              <p class="uk-text-muted" data-ng-show="!versions.length">
-                @lang('Empty')
-              </p>
+              <div data-ng-show="versions.length">
+                  <h3 class="uk-panel-title">@lang('Versions')</h3>
 
-              <ul class="uk-nav uk-nav-offcanvas" data-ng-show="versions.length">
-                <li data-ng-repeat="version in versions">
-                  <a href="#v-@@ version.uid @@" data-ng-click="restoreVersion(version.uid)" title="@lang('Restore this version')" data-uk-tooltip="{pos:'right'}"><i class="uk-icon-clock-o"></i> @@ version.time | fmtdate:'d M, Y H:i:s' @@</a>
-                </li>
-              </ul>
-              <br>
+                  <ul class="uk-nav uk-nav-offcanvas" data-ng-show="versions.length">
+                    <li data-ng-repeat="version in versions">
+                      <a href="#v-@@ version.uid @@" data-ng-click="restoreVersion(version.uid)" title="@lang('Restore this version')" data-uk-tooltip="{pos:'right'}"><i class="uk-icon-clock-o"></i> @@ version.time | fmtdate:'d M, Y H:i:s' @@</a>
+                    </li>
+                  </ul>
+                  <br>
 
-              <div class="uk-button-group uk-width-1-1">
-                <button type="button" class="uk-button uk-button-large uk-button-danger uk-width-1-2" data-ng-click="clearVersions()" title="@lang('Clear version history')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-trash-o"></i></button>
-                <button type="button" class="uk-button uk-button-large uk-button-primary uk-width-1-2" onclick="$.UIkit.offcanvas.offcanvas.hide()" title="@lang('Close versions')" data-uk-tooltip="{pos:'bottom'}">@lang('Cancel')</button>
+                  <div class="uk-button-group">
+                    <button type="button" class="uk-button uk-button-danger" data-ng-click="clearVersions()" title="@lang('Clear version history')" data-uk-tooltip="{pos:'bottom-left'}"><i class="uk-icon-trash-o"></i></button>
+                    <button type="button" class="uk-button uk-button-primary" onclick="$.UIkit.offcanvas.hide()" title="@lang('Close versions')" data-uk-tooltip="{pos:'bottom-left'}">@lang('Cancel')</button>
+                  </div>
+              </div>
+
+              <div class="uk-text-muted uk-text-center" data-ng-show="!versions.length">
+                <div class="uk-margin-small-bottom"><i class="uk-icon-clock-o"></i></div>
+                <div>@lang('Empty')</div>
               </div>
           </div>
         </div>
@@ -80,7 +86,7 @@
                         <div class="uk-text-small uk-text-danger uk-float-right uk-animation-slide-top" data-ng-if="field.error">@@ field.error @@</div>
 
                         <div data-ng-switch-when="html">
-                            <textarea class="uk-width-1-1 uk-form-large" data-ng-class="{'uk-form-danger':field.error}" data-ng-model="entry[field.name]"></textarea>
+                            <htmleditor data-ng-model="entry[field.name]"></htmleditor>
                         </div>
 
                         <div data-ng-switch-when="code">
@@ -92,11 +98,15 @@
                         </div>
 
                         <div data-ng-switch-when="markdown">
-                            <markdown data-ng-model="entry[field.name]"></markdown>
+                            <htmleditor data-ng-model="entry[field.name]" options="{markdown:true}"></htmleditor>
                         </div>
 
                         <div data-ng-switch-when="gallery">
                             <gallery data-ng-model="entry[field.name]"></gallery>
+                        </div>
+
+                        <div data-ng-switch-when="link-collection">
+                            <div link-collection="@@ field.collection @@" data-ng-model="entry[field.name]" data-multiple="@@ field.multiple ? 'true':'false' @@">Linking @@ field.collection @@</div>
                         </div>
 
                         <div data-ng-switch-default>
@@ -125,7 +135,7 @@
                         </div>
 
                         <div data-ng-switch-when="media">
-                            <input type="text" media-path-picker data-ng-class="{'uk-form-danger':field.error}" data-ng-model="entry[field.name]">
+                            <input type="text" media-path-picker="@@ field.allowed || '*' @@" data-ng-class="{'uk-form-danger':field.error}" data-ng-model="entry[field.name]">
                         </div>
 
                         <div data-ng-switch-when="boolean">
@@ -133,11 +143,22 @@
                         </div>
 
                         <div data-ng-switch-when="date">
-                            <input class="uk-width-1-1 uk-form-large" type="text" data-ng-class="{'uk-form-danger':field.error}" data-uk-datepicker="{format:'YYYY-MM-DD'}" data-ng-model="entry[field.name]">
+                            <div class="uk-form-icon uk-width-1-1">
+                                <i class="uk-icon-calendar"></i>
+                                <input class="uk-width-1-1 uk-form-large" type="text" data-ng-class="{'uk-form-danger':field.error}" data-uk-datepicker="{format:'YYYY-MM-DD'}" data-ng-model="entry[field.name]">
+                            </div>
                         </div>
 
                         <div data-ng-switch-when="time">
                             <input class="uk-width-1-1 uk-form-large" type="text" data-ng-class="{'uk-form-danger':field.error}" data-uk-timepicker data-ng-model="entry[field.name]">
+                        </div>
+
+                        <div data-ng-switch-when="region">
+                            <input class="uk-width-1-1 uk-form-large" type="text" region-picker data-ng-class="{'uk-form-danger':field.error}" data-ng-model="entry[field.name]">
+                        </div>
+
+                        <div data-ng-switch-when="tags">
+                            <tags data-ng-model="entry[field.name]"></tags>
                         </div>
 
                         <div data-ng-switch-default>

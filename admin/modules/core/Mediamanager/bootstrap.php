@@ -5,13 +5,21 @@
 
 $this->module("mediamanager")->extend([
 
-    "thumbnail" => function($image, $width, $height, $options=array()) use($app) {
+    "thumbnail" => function($image, $width = null, $height = null, $options=array()) use($app) {
+
+        if($width && is_array($height)) {
+            $options = $height;
+            $height  = $width;
+        } else {
+            $height = $height ?: $width;
+        }
 
         $options = array_merge(array(
             "rebuild"     => false,
             "cachefolder" => "cache:thumbs",
             "quality"     => 100,
-            "base64"      => false
+            "base64"      => false,
+            "mode"        => "crop"
         ), $options);
 
         extract($options);
@@ -28,10 +36,24 @@ $this->module("mediamanager")->extend([
             return $url;
         }
 
+        if(!is_numeric($height)) {
+            $height = $width;
+        }
+
+        if(is_null($width) && is_null($height)) {
+            return $app->pathToUrl($path);
+        }
+
+        if (!in_array($mode, ['crop', 'best_fit', 'resize'])) {
+            $mode = 'crop';
+        }
+
+        $method = $mode == 'crop' ? 'thumbnail':$mode;
+
         if($base64) {
 
             try {
-                $data = $app("image")->take($path)->thumbnail($width, $height)->base64data(null, $quality);
+                $data = $app("image")->take($path)->{$method}($width, $height)->base64data(null, $quality);
             } catch(Exception $e) {
                 return $url;
             }
@@ -41,11 +63,11 @@ $this->module("mediamanager")->extend([
         } else {
 
             $filetime = filemtime($path);
-            $savepath = $app->path($cachefolder)."/".md5($path)."_{$width}x{$height}_{$quality}_{$filetime}.{$ext}";
+            $savepath = $app->path($cachefolder)."/".md5($path)."_{$width}x{$height}_{$quality}_{$filetime}_{$mode}.{$ext}";
 
             if($rebuild || !file_exists($savepath)) {
                 try {
-                    $app("image")->take($path)->thumbnail($width, $height)->save($savepath, $quality);
+                    $app("image")->take($path)->{$method}($width, $height)->save($savepath, $quality);
                 } catch(Exception $e) {
                     return $url;
                 }
@@ -69,16 +91,16 @@ $app->renderer()->extend(function($content){
 
 if (!function_exists('thumbnail_url')) {
 
-    function thumbnail_url($image, $width, $height, $options=array()) {
+    function thumbnail_url($image, $width = null, $height = null, $options=array()) {
         return cockpit("mediamanager")->thumbnail($image, $width, $height, $options);
     }
 }
 
 if (!function_exists('thumbnail')) {
 
-    function thumbnail($image, $width, $height, $options=array()) {
+    function thumbnail($image, $width = null, $height = null, $options=array()) {
 
-        $url = cockpit("mediamanager")->thumbnail($image, $width, $height, $options=array());
+        $url = cockpit("mediamanager")->thumbnail($image, $width, $height, $options);
 
         echo '<img src="'.$url.'" alt="'.$url.'">';
     }
@@ -94,8 +116,8 @@ if(COCKPIT_ADMIN && !COCKPIT_REST) {
 
 
     $app->on("app.layout.header", function() use($app){
-        
-        $mediapath = trim($app->module("auth")->get_group_setting("media.path", '/'), '/');
+
+        $mediapath = trim($app->module("auth")->getGroupSetting("media.path", '/'), '/');
 
         ?>
             <script>

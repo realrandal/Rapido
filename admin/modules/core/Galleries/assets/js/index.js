@@ -35,6 +35,45 @@
             });
         };
 
+        $scope.selected = null;
+
+        $scope.$on('multiple-select', function(e, data){
+            $timeout(function(){
+                $scope.selected = data.items.length ? data.items : null;
+            }, 0);
+        });
+
+        $scope.removeSelected = function(){
+            if ($scope.selected && $scope.selected.length) {
+
+                App.Ui.confirm(App.i18n.get("Are you sure?"), function() {
+
+                    var row, scope, $index, $ids = [];
+
+                    for(var i=0;i<$scope.selected.length;i++) {
+                        row     = $scope.selected[i],
+                        scope   = $(row).scope(),
+                        gallery = scope.gallery,
+                        $index  = scope.$index;
+
+                        (function(row, scope, gallery, $index){
+
+                            $http.post(App.route("/api/galleries/remove"), { "gallery": angular.copy(gallery) }, {responseType:"json"}).success(function(data){
+
+                            }).error(App.module.callbacks.error.http);
+
+                            $ids.push(gallery._id);
+
+                        })(row, scope, gallery, $index);
+                    }
+
+                    $scope.galleries = $scope.galleries.filter(function(gallery){
+                        return ($ids.indexOf(gallery._id)===-1);
+                    });
+                });
+            }
+        };
+
         $scope.filter = "";
 
         $scope.matchName = function(name) {
@@ -129,8 +168,6 @@
                 $scope.updateGroups();
             });
         });
-
-        nativesortable(grouplist[0]);
     });
 
 })(jQuery);

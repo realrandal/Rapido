@@ -14,8 +14,16 @@
                 '<div class="uk-modal-dialog uk-modal-dialog-large">',
                     '<button type="button" class="uk-modal-close uk-close"></button>',
                     '<h4>Mediapicker</h4>',
-                    '<div class="caption">&nbsp;</div>',
-                    '<div class="uk-modal-scrollable-box uk-margin-top">',
+                    '<div class="uk-clearfix">',
+                    '<div class="caption uk-float-left">&nbsp;</div>',
+                    '<div class="uk-float-right">',
+                        '<span class="uk-button uk-form-file" data-uk-tooltip title="'+App.i18n.get('Upload files')+'">',
+                            '<input class="js-upload-select" type="file" multiple="true" title="">',
+                            '<i class="uk-icon-plus"></i>',
+                        '</span>',
+                    '</div>',
+                    '</div>',
+                    '<div class="uk-overflow-container uk-margin-top">',
                         '<ul class="dir-view uk-grid uk-grid-width-1-5 uk-grid-small uk-clearfix"></ul>',
                     '</div>',
                     '<div class="uk-modal-buttons"><button class="media-select uk-button uk-button-large uk-button-primary" type="button">Select</button> <button class="uk-button uk-button-large uk-modal-close" type="button">Cancel</button></div>',
@@ -24,7 +32,7 @@
         ].join('')).appendTo('body');
 
 
-        App.assets.require(['assets/vendor/ajaxupload.js'], function(){
+        App.assets.require($.UIkit.Utils.xhrupload ? [] : ['assets/vendor/uikit/js/addons/upload.min.js'], function(){
 
             var uploadsettings = {
                     "action": App.route('/mediamanager/api'),
@@ -39,19 +47,42 @@
                     "progress": function(percent){
                         $this.caption.html('<span>'+Math.ceil(percent)+"%</span>");
                     },
-                    "allcomplete": function(){
-                        $this.loadPath($this.currentpath);
-                    },
-                    "complete": function(res){
+                    "allcomplete": function(response){
 
+                        if(response && response.length) {
+                            $this.loadPath($this.currentpath);
+                        } else {
+                            App.module.callbacks.error.http();
+                        }
                     }
                 };
 
-            modal.uploadOnDrag(uploadsettings);
+            var uploadselect = new $.UIkit.uploadSelect(modal.find('input.js-upload-select'), uploadsettings);
+
+            modal.on("drop", function(e){
+
+                if (e.dataTransfer && e.dataTransfer.files) {
+
+                    e.stopPropagation();
+                    e.preventDefault();
+
+                    $.UIkit.Utils.xhrupload(e.dataTransfer.files, uploadsettings);
+                }
+
+            }).on("dragenter", function(e){
+                    e.stopPropagation();
+                    e.preventDefault();
+            }).on("dragover", function(e){
+                    e.stopPropagation();
+                    e.preventDefault();
+            }).on("dragleave", function(e){
+                    e.stopPropagation();
+                    e.preventDefault();
+            });
         });
 
 
-        var picker = new $.UIkit.modal.Modal(modal);
+        var picker = $.UIkit.modal(modal);
 
 
         this.type    = type || '*';
@@ -63,14 +94,13 @@
         picker.show();
 
         this.dirview.on("click", "li", function(){
-            var data = $(this).data();
 
-            $this.dirview.children().removeClass("active").filter(this).addClass("active");
+            var data = $(this).data();
 
             $this.mediapath = 'site:'+[site2media, data.path].join('/').replace(/^\/+|\/+$/g, "");
 
+            $this.dirview.children().removeClass("active").filter(this).addClass("active");
             $this.btnOk.prop("disabled", !matchName($this.type, data.name));
-
         });
 
         this.dirview.on("dblclick", "li", function(){
@@ -147,13 +177,29 @@
 
                 setTimeout(function(){
                     $this.dirview.find('[data-file]').each(function(){
-                        var element = $(this);
+                        var element = $(this), url = element.data("file"), $r;
 
-                        if(element.data("file").match(/\.(jpg|jpeg|png|gif|svg)$/i)) {
-                            var $r = $('<div class="media-url-preview" style="background-image:url('+element.data("file")+');margin:0 auto;"></div>');
-
-                            element.replaceWith($r.css({width:element.width(),height:element.height()}));
+                        if(url.match(/\.(jpg|jpeg|png|gif|svg)$/i)) {
+                            $r = $('<div class="media-url-preview" style="background-image:url('+element.data("file")+');margin:0 auto;"></div>').css({width:element.width(), height:element.height()});
                         }
+
+                        if (url.match(/\.(mp4|mpeg|ogv|webm|wmv)$/i)) {
+                            $r = '<i class="uk-icon-file-video-o"></i>';
+                        }
+
+                        if (url.match(/\.(zip|rar|gz|7zip|bz2)$/i)) {
+                            $r = '<i class="uk-icon-file-archive-o"></i>';
+                        }
+
+                        if (url.match(/\.(pdf)$/i)) {
+                            $r = '<i class="uk-icon-file-pdf-o"></i>';
+                        }
+
+                        if (url.match(/\.(sqlite|db)$/i)) {
+                            $r = '<i class="uk-icon-database"></i>';
+                        }
+
+                        if($r) element.replaceWith($r);
                     })
                 }, 0);
 
@@ -177,16 +223,17 @@
 
                     $element = $(elm);
 
-                    var $tpl = $('<div><div class="uk-margin" data-preview=""></div><button class="uk-button uk-button-small app-button-secondary" type="button"><i class="uk-icon-code-fork"></i> Pick Media path</button></div>'),
-                        $btn = $tpl.find('button'),
-                        $prv = $tpl.find('[data-preview]');
+                    var $tpl   = $('<div><div class="uk-margin" data-preview=""></div><button class="uk-button uk-button-small app-button-secondary js-select" type="button"><i class="uk-icon-code-fork"></i> Pick Media path</button> <button class="uk-button uk-button-small app-button-secondary uk-hidden js-clear" type="button"><i class="uk-icon-trash-o"></i></button></div>'),
+                        $btn   = $tpl.find('.js-select'),
+                        $prv   = $tpl.find('[data-preview]'),
+                        $clear = $tpl.find('.js-clear');
 
                     $element.after($tpl);
 
                     function setPath(path) {
 
                         if(!path) {
-                           return $prv.html('');
+                           return $prv.html('<span class="uk-text-muted uk-text-small"><i class="uk-icon-info-circle"></i> '+App.i18n.get('Nothing selected')+'</span>');
                         }
 
                         if(path && path.match(/\.(jpg|jpeg|png|gif)$/i)) {
@@ -206,11 +253,27 @@
 
                             setPath(path);
 
+                            if (path) {
+                                $clear.removeClass('uk-hidden');
+                            }
+
                             if (angular.isDefined(ngModel)) {
                                 ngModel.$setViewValue(path);
                                 if (!scope.$$phase) scope.$apply();
                             }
                         }, $element.attr("media-path-picker") || "*");
+
+                    });
+
+                    $clear.on("click", function(){
+
+                        setPath(false);
+                        $clear.addClass('uk-hidden');
+
+                        if (angular.isDefined(ngModel)) {
+                            ngModel.$setViewValue('');
+                            if (!scope.$$phase) scope.$apply();
+                        }
 
                     });
 
@@ -220,6 +283,10 @@
 
                             ngModel.$render = function () {
                                 setPath(ngModel.$viewValue);
+
+                                if (ngModel.$viewValue) {
+                                    $clear.removeClass('uk-hidden');
+                                }
                             };
 
                             ngModel.$render();
@@ -259,7 +326,7 @@
             };
 
             editor.addMenuItem('mediapath', {
-                icon: false,
+                icon: 'image',
                 text: 'Insert media',
                 onclick: picker,
                 context: 'insert',

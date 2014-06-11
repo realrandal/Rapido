@@ -35,7 +35,7 @@ $app->bind("/api/forms/submit/:form", function($params) use($app){
                 $body[] = (is_string($value) ? $value:json_encode($value))."\n<br>";
             }
 
-            $app("mailer")->mail($frm["email"], $app->param("__mailsubject", "New form data for: ".$form), implode("\n<br>", $body));
+            $app->mailer->mail($frm["email"], $app->param("__mailsubject", "New form data for: ".$form), implode("\n<br>", $body));
         }
 
         if(isset($frm["entry"]) && $frm["entry"]) {
@@ -120,7 +120,7 @@ if(COCKPIT_ADMIN && !COCKPIT_REST) {
 
         $title = $app("i18n")->get("Forms");
         $badge = $app->db->getCollection("common/forms")->count();
-        $forms = $app->db->find("common/forms", ["limit"=> 3, "sort"=>["created"=>-1] ]);
+        $forms = $app->db->find("common/forms", ["limit"=> 3, "sort"=>["created"=>-1] ])->toArray();
 
         echo $app->view("forms:views/dashboard.php with cockpit:views/layouts/dashboard.widget.php", compact('title', 'badge', 'forms'));
     });

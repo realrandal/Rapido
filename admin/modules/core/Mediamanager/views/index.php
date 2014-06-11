@@ -1,13 +1,16 @@
 {{ $app->assets(['assets:vendor/codemirror/codemirror.js','assets:vendor/codemirror/codemirror.css','assets:vendor/codemirror/pastel-on-dark.css'], $app['cockpit/version']) }}
 
-{{ $app->assets(['assets:vendor/ajaxupload.js'], $app['cockpit/version']) }}
 {{ $app->assets(['assets:vendor/loadie/jquery.loadie.js', 'assets:vendor/loadie/loadie.css'], $app['cockpit/version']) }}
+
+{{ $app->assets(['assets:vendor/uikit/js/addons/upload.min.js']) }}
+{{ $app->assets(['assets:vendor/fuzzysearch.js']) }}
+
 {{ $app->assets(['mediamanager:assets/js/index.js'], $app['cockpit/version']) }}
 
 {{ $app->assets(['assets:angular/directives/mediapreview.js'], $app['cockpit/version']) }}
 
 
-<div class="app-wrapper" data-ng-controller="mediamanager" ng-cloak>
+<div data-ng-controller="mediamanager" ng-cloak>
 
     <div class="uk-navbar">
         <span class="uk-navbar-brand">@lang('Mediamanager')</span>
@@ -38,13 +41,24 @@
             </li>
             <li><a href="" ng-click="action('createfolder')"><i class="uk-icon-plus-circle"></i>&nbsp; @lang('Folder')</a></li>
             <li><a href="" ng-click="action('createfile')"><i class="uk-icon-plus-circle"></i>&nbsp; @lang('File')</a></li>
-            <li class="media-upload-button">
-                <a><i class="uk-icon-upload"></i>&nbsp; </a>
-                <form id="frmMediaUpload" action="">
-                    <input type="file" name="files[]" onchange="jQuery(this.form).trigger('submit')" multiple="true">
-                </form>
-            </li>
         </ul>
+
+        <div class="uk-navbar-flip">
+
+            <div class="uk-navbar-content">
+                <div id="dirsearch" class="uk-autocomplete uk-search" ng-show="dirlist">
+                    <input class="uk-search-field" type="text" placeholder="..." data-uk-tooltip title="@lang('Find files...')">
+                    <div class="uk-dropdown uk-dropdown-flip"></div>
+                </div>
+            </div>
+
+            <div class="uk-navbar-content">
+                <span class="uk-button uk-form-file" data-uk-tooltip title="@lang('Upload files')">
+                    <input id="js-upload-select" type="file" multiple="true" title="">
+                    <i class="uk-icon-plus"></i>
+                </span>
+            </div>
+        </div>
     </div>
     <br>
     <div class="app-panel">
@@ -59,10 +73,11 @@
         <div class="uk-navbar uk-margin-large-bottom">
 
             <div class="uk-navbar-content">
-                <div class="uk-button-group">
+                <div class="uk-button-group uk-margin-right">
                     <button class="uk-button" data-ng-class="mode=='table' ? 'uk-button-primary':''" data-ng-click="(mode='table')" title="@lang('Table mode')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-th-list"></i></button>
                     <button class="uk-button" data-ng-class="mode=='list' ? 'uk-button-primary':''" data-ng-click="(mode='list')" title="@lang('List mode')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-th"></i></button>
                 </div>
+                <button class="uk-button uk-button-danger" ng-click="deleteSelected()" ng-show="hasSelected()"><i class="uk-icon-trash-o"></i></button>
             </div>
 
             <div class="uk-navbar-content">
@@ -85,8 +100,9 @@
         </div>
 
         <ul class="uk-grid uk-grid-small" data-ng-show="mode=='list' && dir && (dir.folders.length || dir.files.length)">
-            <li class="uk-grid-margin uk-width-medium-1-5 uk-width-1-1" ng-repeat="folder in dir.folders" data-type="folder" data-ng-hide="(viewfilter=='files' || !matchName(folder.name))">
+            <li class="uk-grid-margin uk-width-medium-1-5 uk-width-1-1" ng-repeat="folder in dir.folders track by folder.path" data-type="folder" data-ng-hide="(viewfilter=='files' || !matchName(folder.name))">
                 <div class="app-panel">
+                    <span class="js-select"><input type="checkbox" ng-model="selected[folder.path]"></span>
                     <div class="mm-type mm-type-folder">
                         <i class="uk-icon-folder-o"></i>
                     </div>
@@ -100,11 +116,11 @@
                     </div>
                 </div>
             </li>
-            <li class="uk-grid-margin uk-width-medium-1-5 uk-width-1-1" ng-repeat="file in dir.files" data-ng-hide="(viewfilter=='folders' || !matchName(file.name))">
+            <li class="uk-grid-margin uk-width-medium-1-5 uk-width-1-1" ng-repeat="file in dir.files track by file.path" data-ng-hide="(viewfilter=='folders' || !matchName(file.name))">
                 <div class="app-panel">
+                    <span class="js-select"><input type="checkbox" ng-model="selected[file.path]"> </span>
                     <div class="mm-type mm-type-file">
                         <i class="uk-icon-file-o" media-preview="@@ file.url @@"></i>
-
                     </div>
                     <div class="app-panel-box docked-bottom uk-text-center">
                         <div class="uk-text-truncate mm-caption" title="@@ file.name @@"><a ng-click="open(file)">@@ file.name @@</a></div>
@@ -123,6 +139,7 @@
         <table class="uk-table uk-table-hover media-table" data-ng-show="mode=='table' && dir && (dir.folders.length || dir.files.length)">
             <thead>
                 <tr>
+                    <th width="20" ng-click="selectAllToggle()"><input type="checkbox" ng-model="selectAll"></th>
                     <th width="20"></th>
                     <th>@lang('Name')</th>
                     <th class="uk-text-right" width="100">@lang('Size')</th>
@@ -131,7 +148,8 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="folder in dir.folders" data-type="folder" data-ng-hide="(viewfilter=='files' || !matchName(folder.name))">
+                <tr ng-repeat="folder in dir.folders track by folder.path" data-type="folder" data-ng-hide="(viewfilter=='files' || !matchName(folder.name))">
+                   <td><input type="checkbox" ng-model="selected[folder.path]"></td>
                    <td><i class="uk-icon-folder-o"></i></td>
                    <td><div class="uk-text-truncate" title="@@ folder.name @@"><a href="#@@ folder.path @@" ng-click="updatepath(folder.path)">@@ folder.name @@</a></div></td>
                    <td>&nbsp;</td>
@@ -151,7 +169,8 @@
                    </td>
                 </tr>
 
-                <tr ng-repeat="file in dir.files" data-type="folder" data-ng-hide="(viewfilter=='folders' || !matchName(file.name))">
+                <tr ng-repeat="file in dir.files track by file.path" data-type="file" data-ng-hide="(viewfilter=='folders' || !matchName(file.name))">
+                   <td><input type="checkbox" ng-model="selected[file.path]"></td>
                    <td><i class="uk-icon-file-o" media-preview="@@ file.url @@"></i></td>
                    <td><div class="uk-text-truncate" title="@@ file.name @@"><a ng-click="open(file)">@@ file.name @@</a></div></td>
                    <td class="uk-text-right">@@ file.size @@</td>
@@ -182,11 +201,11 @@
         </div>
 
     </div>
-
 </div>
 
 <div id="mm-image-preview" class="uk-modal">
     <div class="uk-modal-dialog">
+        <a class="uk-modal-close uk-close"></a>
         <div class="modal-content uk-text-center"></div>
     </div>
 </div>
@@ -210,10 +229,19 @@
 
 <style>
 
+    ul .app-panel {
+        position: relative;
+    }
+
     .app-panel a {
         cursor: pointer;
     }
 
+    .app-panel .js-select {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
 
     .mm-type {
         position: relative;
@@ -242,22 +270,6 @@
 
     ul .mm-actions > li > a { color: #ccc; }
 
-    .media-upload-button {
-        position: relative;
-        overflow: hidden;
-        cursor: pointer;
-    }
-    .media-upload-button form {
-        opacity: 0;
-        position: absolute;
-        padding: 0;
-        margin: 0;
-        top:0;
-        left:0;
-        font-size: 500px;
-    }
-    .media-upload-button * { cursor: pointer; }
-
     .media-dir .uk-icon-folder-o, .media-table .uk-icon-folder-o {
         color: #999;
     }
@@ -275,6 +287,11 @@
         width: 14px;
     }
 
+    /* dirsearch */
+
+    #dirsearch .uk-dropdown {
+        width: 400px;
+    }
 
     /* editor */
 

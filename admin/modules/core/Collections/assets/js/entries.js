@@ -4,20 +4,11 @@
 
         $scope.collection = COLLECTION || {};
         $scope.fields = [];
+        $scope.filter = $('input[name="filter"]').val();
 
         $scope.fields = (COLLECTION.fields.length ? COLLECTION.fields : [COLLECTION.fields]).filter(function(field){
             return field.lst;
         });
-
-        $http.post(App.route("/api/collections/entries"), {
-
-            "collection": angular.copy($scope.collection)
-
-        }, {responseType:"json"}).success(function(data){
-
-            if(data) $scope.entries = data;
-
-        }).error(App.module.callbacks.error.http);
 
         $scope.remove = function(index, entryId){
             App.Ui.confirm(App.i18n.get("Are you sure?"), function(){
@@ -39,59 +30,105 @@
             });
         };
 
-        // batch actions
+        $scope.loadmore = function() {
 
-        $scope.selected = [];
+            var limit  = 25, filter = false;
 
-        $scope.removeSelected = function(){
+            if($scope.filter) {
 
-            if(!$scope.selected.length) return;
+                var criteria = {};
 
-            App.Ui.confirm(App.i18n.get("Are you sure?"), function(){
-
-                var collection = angular.copy($scope.collection);
-
-                $scope.selected.forEach(function(entryId){
-                    for(var index=0; index<$scope.entries.length;index++) {
-                        if($scope.entries[index]._id == entryId) {
-
-                            $http.post(App.route("/api/collections/removeentry"), {
-                                "collection": collection,
-                                "entryId": entryId
-                            }, {responseType:"json"}).error(App.module.callbacks.error.http);
-
-                            $scope.entries.splice(index, 1);
-                            $scope.collection.count -= 1;
+                COLLECTION.fields.forEach(function(field){
+                    switch(field.type) {
+                        case 'text':
+                        case 'code':
+                        case 'html':
+                        case 'markdown':
+                        case 'wysiwyg':
+                            criteria[field.name] = {'$regex':$scope.filter};
                             break;
-                        }
                     }
                 });
 
-                $scope.selected = [];
-            });
+                if(Object.keys(criteria).length) filter = {'$or':criteria};
+            }
+
+            $http.post(App.route("/api/collections/entries"), {
+
+                "collection": angular.copy($scope.collection),
+                "limit": limit,
+                "filter": JSON.stringify(filter),
+                "skip": $scope.entries ? $scope.entries.length : 0
+
+            }, {responseType:"json"}).success(function(data){
+
+                if(data) {
+
+                    if(!$scope.entries) {
+                        $scope.entries = [];
+                    }
+
+                    if(data.length) {
+
+                        if(data.length < limit) {
+                            $scope.nomore = true;
+                        }
+
+                        $scope.entries = $scope.entries.concat(data);
+
+                    } else {
+                       $scope.nomore = true;
+                    }
+
+                }
+
+            }).error(App.module.callbacks.error.http);
         };
 
-        var updateSelected = function(){
-            var items = $(".js-select:checked");
+        // batch actions
 
-            $scope.$apply(function(){
-                $scope.selected = [];
+        $scope.selected = null;
 
-                items.each(function(){
-                    $scope.selected.push($(this).data("id"));
+        $scope.$on('multiple-select', function(e, data){
+            $timeout(function(){
+                $scope.selected = data.items.length ? data.items : null;
+            }, 0);
+        });
+
+        $scope.removeSelected = function(){
+            if ($scope.selected && $scope.selected.length) {
+
+                App.Ui.confirm(App.i18n.get("Are you sure?"), function() {
+
+                    var row, scope, $index, $ids = [], collection = angular.copy($scope.collection);
+
+                    for(var i=0;i<$scope.selected.length;i++) {
+                        row    = $scope.selected[i],
+                        scope  = $(row).scope(),
+                        entry  = scope.entry,
+                        $index = scope.$index;
+
+                        (function(row, scope, entry, $index){
+
+                            $http.post(App.route("/api/collections/removeentry"), {
+                                "collection": collection,
+                                "entryId": entry._id
+                            }, {responseType:"json"}).error(App.module.callbacks.error.http);
+
+                            $ids.push(entry._id);
+                            $scope.collection.count -= 1;
+
+                        })(row, scope, entry, $index);
+                    }
+
+                    $scope.entries = $scope.entries.filter(function(entry){
+                        return ($ids.indexOf(entry._id)===-1);
+                    });
                 });
-            });
+            }
         };
 
-        var cbAll = $(".js-all").on("click", function(){
-            $(".js-select").prop("checked", cbAll.prop("checked"));
-            updateSelected();
-        });
-
-        $("table").on("click", ".js-select", function(){
-            cbAll.prop("checked", false);
-            updateSelected();
-        });
+        $scope.loadmore();
     });
 
 })(jQuery);

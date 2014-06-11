@@ -43,6 +43,7 @@
                     lineNumbers: true,
                     styleActiveLine: true,
                     matchBrackets: true,
+                    matchTags: true,
                     autoCloseBrackets: true,
                     autoCloseTags: true,
                     mode: 'text',
@@ -77,6 +78,10 @@
                           break;
                       case 'php':
                           opts.mode = 'application/x-httpd-php';
+                          break;
+                      case 'less':
+                      case 'scss':
+                          mode = 'css';
                           break;
                   }
 

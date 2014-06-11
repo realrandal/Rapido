@@ -1,6 +1,5 @@
-{{ $app->assets(['assets:vendor/nativesortable.js'], $app['cockpit/version']) }}
-
-{{ $app->assets(['assets:vendor/uikit/addons/sortable/sortable.almost-flat.min.css','assets:vendor/uikit/addons/sortable/sortable.min.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:vendor/uikit/js/addons/sortable.min.js'], $app['cockpit/version']) }}
+{{ $app->assets(['assets:vendor/uikit/js/addons/nestable.min.js'], $app['cockpit/version']) }}
 
 {{ $app->assets(['galleries:assets/galleries.js','galleries:assets/js/gallery.js'], $app['cockpit/version']) }}
 {{ $app->assets(['mediamanager:assets/pathpicker.directive.js'], $app['cockpit/version']) }}
@@ -37,15 +36,15 @@
                     <div class="app-panel">
 
                         <div class="uk-form-row">
-                            <input class="uk-width-1-1 uk-form-large" type="text" placeholder="@lang('Name')" data-ng-model="gallery.name" required>
+                            <input class="uk-width-1-1 uk-form-large" type="text" placeholder="@lang('Name')" data-ng-model="gallery.name" pattern="[a-zA-Z0-9\s]+" required>
                         </div>
 
                         <div class="uk-form-row">
 
                             <div data-ng-show="!managefields">
 
-                                <div id="images-list" class="uk-grid" data-uk-grid-match="{target:'.uk-thumbnail'}">
-                                    <div class="uk-width-1-2 uk-width-medium-1-5 uk-grid-margin" data-ng-repeat="image in gallery.images" draggable="true">
+                                <ul id="images-list" class="uk-grid uk-sortable" data-uk-grid-match="{target:'.uk-thumbnail'}" data-uk-sortable>
+                                    <li class="uk-width-1-2 uk-width-medium-1-5 uk-grid-margin" data-ng-repeat="image in gallery.images" draggable="true">
                                         <div class="uk-thumbnail uk-width-1-1 uk-text-center uk-visible-hover">
                                             <div class="uk-text-center" style="background: #fff url(@@ imgurl(image) @@) 50% 50% no-repeat;background-size:contain;height:140px;">
 
@@ -57,8 +56,8 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
+                                    </li>
+                                </ul>
 
 
                                 <div class="uk-text-center uk-margin-large-top uk-margin-large-bottom" data-ng-show="gallery && !gallery.images.length">
@@ -72,10 +71,10 @@
 
                             <div data-ng-show="managefields">
 
-                                <ul id="manage-fields-list" class="uk-sortable" data-uk-sortable="{maxDepth:1}">
+                                <ul id="manage-fields-list" class="uk-nestable" data-uk-nestable="{maxDepth:1}">
                                      <li data-ng-repeat="field in gallery.fields">
-                                        <div class="uk-sortable-item uk-sortable-item-table">
-                                           <div class="uk-sortable-handle"></div>
+                                        <div class="uk-nestable-item uk-nestable-item-table">
+                                           <div class="uk-nestable-handle"></div>
                                            <input type="text" data-ng-model="field.name" placeholder="Field name" pattern="[a-zA-Z0-9]+" required>
                                            <select data-ng-model="field.type" title="@lang('Field type')" data-uk-tooltip>
                                                <option value="text">Text</option>
@@ -86,6 +85,7 @@
                                            </select>
 
                                            <input type="text" data-ng-if="field.type=='select'" data-ng-model="field.options" ng-list placeholder="@lang('options...')">
+                                           <input type="text" data-ng-if="field.type=='media'" data-ng-model="field.allowed" placeholder="*.*" title="@lang('Allowed media types')" data-uk-tooltip>
 
                                            <a data-ng-click="removefield(field)" class="uk-close"></a>
                                         </div>
@@ -108,11 +108,17 @@
                 <div class="uk-width-medium-1-5">
 
                     <div class="uk-form-row">
-                        <strong>@lang("Group")</strong>
-                        <select class="uk-width-1-1 uk-margin-small-top" data-ng-model="gallery.group">
-                            <option ng-repeat="group in groups" value="@@ group @@">@@ group @@</option>
-                            <option value="">- @lang("No group") -</option>
-                        </select>
+                        <label><strong>@lang("Group")</strong></label>
+                        <div class="uk-form-controls uk-margin-small-top">
+                            <div class="uk-form-select">
+                                <i class="uk-icon-sitemap uk-margin-small-right"></i>
+                                <a>@@ gallery.group || '- @lang("No group") -' @@</a>
+                                <select class="uk-width-1-1 uk-margin-small-top" data-ng-model="gallery.group">
+                                    <option ng-repeat="group in groups" value="@@ group @@">@@ group @@</option>
+                                    <option value="">- @lang("No group") -</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="uk-form-row">
@@ -161,7 +167,7 @@
                     </div>
 
                     <div data-ng-switch-when="media">
-                        <input type="text" media-path-picker data-ng-model="$parent.metaimage.data[field.name]">
+                        <input type="text" media-path-picker="@@ field.allowed || '*' @@" data-ng-model="$parent.metaimage.data[field.name]">
                     </div>
 
                     <div data-ng-switch-when="boolean">
@@ -182,21 +188,8 @@
 
 <style>
 
-    #images-list > div {
+    #images-list > li {
         cursor: move;
-        transform: scale(1.0);
-        -webkit-transition: -webkit-transform 0.2s ease-out;
-        transition: transform 0.2s ease-out;
-    }
-
-    #images-list .sortable-dragging {
-        opacity: .25;
-        -webkit-transform: scale(0.8);
-        transform: scale(0.8);
-    }
-
-    #images-list .sortable-over {
-        opacity: .25;
     }
 
     #images-list .uk-thumbnail {
@@ -210,6 +203,4 @@
         -webkit-transform: translateY(-50%);
         transform: translateY(-50%);
     }
-
-
 </style>

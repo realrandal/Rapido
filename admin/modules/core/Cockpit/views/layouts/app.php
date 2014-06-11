@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
     <link rel="icon" href="@base("/assets/images/favicon.ico")" type="image/x-icon">
 
-    @assets($app['app.assets.base'], 'app.base'.$app['cockpit/version'], 'cache:assets', 30, $app['cockpit/version'])
+    @assets($app['app.assets.base'], 'app.base'.$app['cockpit/version'], 'cache:assets', 360, $app['cockpit/version'])
     @assets($app['app.assets.backend'], 'app.backend'.$app['cockpit/version'], 'cache:assets', 360, $app['cockpit/version'])
 
     @trigger('app.layout.header')
@@ -28,7 +28,7 @@
                                 <a href="@route('/accounts/account')" class="uk-clearfix">
                                     <img class="uk-rounded uk-float-left uk-margin-right" src="http://www.gravatar.com/avatar/{{ md5($app['user']['email']) }}?d=mm&s=40" width="40" height="40" alt="avatar">
                                     <div class="uk-text-truncate"><strong>{{ $app["user"]["name"] ? $app["user"]["name"] : $app["user"]["user"] }}</strong></div>
-                                    <div class="uk-text-small uk-text-muted uk-text-truncate">{{ (isset($app["user"]["email"]) ? $app["user"]["email"] : 'no email') }}</div>
+                                    <div class="uk-text-small uk-text-truncate">{{ (isset($app["user"]["email"]) ? $app["user"]["email"] : 'no email') }}</div>
                                 </a>
                             </li>
                             <li class="uk-nav-divider"></li>
@@ -49,7 +49,7 @@
             </ul>
 
             <div class="uk-navbar-content uk-hidden-small">
-                <form id="frmCockpitSearch" class="uk-search" data-uk-search="{source:'@route('/cockpit-globsearch')', msgMoreResults:false, msgResultsHeader: '@lang('Search Results')', msgNoResults: '@lang('No results found')'}" onsubmit="return false;">
+                <form id="frmCockpitSearch" class="uk-search" data-uk-search="{source:'@route('/cockpit-globalsearch')', msgMoreResults:false, msgResultsHeader: '@lang('Search Results')', msgNoResults: '@lang('No results found')'}" onsubmit="return false;">
                     <input class="uk-search-field" type="search" placeholder="@lang('Search...')" autocomplete="off">
                     <button class="uk-search-close" type="reset"></button>
                 </form>
@@ -57,7 +57,7 @@
 
             <div class="uk-navbar-flip">
 
-                <ul class="uk-navbar-nav">
+                <ul class="uk-navbar-nav app-top-navbar-links">
                     @foreach($app("admin")->menu('top') as $item)
                     <li class="{{ (isset($item["active"]) && $item["active"]) ? 'uk-active':'' }}">
                         <a href="{{ $item["url"] }}" title="{{ $item["title"] }}" data-uk-tooltip>{{ $item["label"] }}</a>
@@ -66,11 +66,6 @@
 
                     @trigger("navbar-primary")
                 </ul>
-
-
-                <div class="uk-navbar-content uk-hidden-small">
-                    <i class="uk-icon-time"></i> <strong app-clock="h:i A">00:00 AM</strong>
-                </div>
             </div>
         </div>
     </nav>
