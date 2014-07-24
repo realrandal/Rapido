@@ -12,7 +12,7 @@ $this->module("regions")->extend([
             return null;
         }
 
-        $renderer = $app->renderer();
+        $renderer = $app->renderer;
         $fields   = [];
 
         if(isset($region["fields"]) && count($region["fields"])) {
@@ -34,7 +34,7 @@ $this->module("regions")->extend([
 ]);
 
 // extend lexy parser
-$app->renderer()->extend(function($content){
+$app->renderer->extend(function($content){
 
     $content = preg_replace('/(\s*)@region\((.+?)\)/', '$1<?php echo cockpit("regions")->render($2); ?>', $content);
 
@@ -63,43 +63,43 @@ $app->on("cockpit.rest.init", function($routes) {
 if(COCKPIT_ADMIN && !COCKPIT_REST) {
 
 
-    $app->on("admin.init", function() use($app){
+    $app->on("admin.init", function() {
 
-        if(!$app->module("auth")->hasaccess("Regions", ['create.regions', 'edit.regions'])) return;
+        if(!$this->module("auth")->hasaccess("Regions", ['create.regions', 'edit.regions'])) return;
 
-        $app->bindClass("Regions\\Controller\\Regions", "regions");
-        $app->bindClass("Regions\\Controller\\Api", "api/regions");
+        $this->bindClass("Regions\\Controller\\Regions", "regions");
+        $this->bindClass("Regions\\Controller\\Api", "api/regions");
 
-        $app("admin")->menu("top", [
-            "url"    => $app->routeUrl("/regions"),
+        $this("admin")->menu("top", [
+            "url"    => $this->routeUrl("/regions"),
             "label"  => '<i class="uk-icon-th-large"></i>',
-            "title"  => $app("i18n")->get("Regions"),
-            "active" => (strpos($app["route"], '/regions') === 0)
+            "title"  => $this("i18n")->get("Regions"),
+            "active" => (strpos($this["route"], '/regions') === 0)
         ], 5);
 
         // handle global search request
-        $app->on("cockpit.globalsearch", function($search, $list) use($app){
+        $this->on("cockpit.globalsearch", function($search, $list) {
 
-            foreach ($app->db->find("common/regions") as $r) {
+            foreach ($this->db->find("common/regions") as $r) {
                 if(stripos($r["name"], $search)!==false){
                     $list[] = [
                         "title" => '<i class="uk-icon-th-large"></i> '.$r["name"],
-                        "url"   => $app->routeUrl('/regions/region/'.$r["_id"])
+                        "url"   => $this->routeUrl('/regions/region/'.$r["_id"])
                     ];
                 }
             }
         });
     });
 
-    $app->on("admin.dashboard.aside", function() use($app){
+    $app->on("admin.dashboard.aside", function() {
 
-        if(!$app->module("auth")->hasaccess("Regions", ['create.regions', 'edit.regions'])) return;
+        if(!$this->module("auth")->hasaccess("Regions", ['create.regions', 'edit.regions'])) return;
 
-        $title   = $app("i18n")->get("Regions");
-        $badge   = $app->db->getCollection("common/regions")->count();
-        $regions = $app->db->find("common/regions", ["limit"=> 3, "sort"=>["created"=>-1] ])->toArray();
+        $title   = $this("i18n")->get("Regions");
+        $badge   = $this->db->getCollection("common/regions")->count();
+        $regions = $this->db->find("common/regions", ["limit"=> 3, "sort"=>["created"=>-1] ])->toArray();
 
-        echo $app->view("regions:views/dashboard.php with cockpit:views/layouts/dashboard.widget.php", compact('title', 'badge', 'regions'));
+        $this->renderView("regions:views/dashboard.php with cockpit:views/layouts/dashboard.widget.php", compact('title', 'badge', 'regions'));
     });
 
 

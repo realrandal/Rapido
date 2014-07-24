@@ -82,7 +82,8 @@
                             data.files.forEach(function(file) {
 
                                 if(file.name.match(/\.(jpg|png|gif)$/i)) {
-                                    $scope.gallery.images.push({"path":"site:"+site2media+'/'+file.path, data:{}});
+                                    var full_path = site2media ? site2media+'/'+file.path : file.path;
+                                    $scope.gallery.images.push({"path":"site:"+full_path, data:{}});
 
                                     count = count + 1;
                                 }
@@ -120,7 +121,7 @@
         };
 
         $scope.imgurl = function(image) {
-            return image.path.replace('site:', window.COCKPIT_SITE_BASE_URL);
+            return encodeURI(image.path.replace('site:', window.COCKPIT_SITE_BASE_URL));
         };
 
         $scope.showMeta = function(index){
@@ -151,9 +152,7 @@
 
         };
 
-        var imglist = $("#images-list");
-
-        imglist.on("dragend", "[draggable]",function(){
+        var imglist = $("#images-list").on("sortable-change",function(){
 
             var images = [];
 
@@ -168,7 +167,7 @@
 
         // after sorting list
 
-        var list = $("#manage-fields-list").on("sortable-change", function(){
+        var list = $("#manage-fields-list").on("nestable-change", function(){
             var fields = [];
 
             list.children().each(function(){
@@ -178,6 +177,17 @@
             $scope.$apply(function(){
                 $scope.gallery.fields = fields;
             });
+        });
+
+        // bind clobal command + save
+        Mousetrap.bindGlobal(['command+s', 'ctrl+s'], function(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            } else {
+                e.returnValue = false; // ie
+            }
+            $scope.save();
+            return false;
         });
 
     });

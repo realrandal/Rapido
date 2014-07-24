@@ -6,8 +6,6 @@ class App extends \Lime\App {
 
     public $viewvars = array();
 
-    protected $view_renderer = null;
-
     public function __construct ($settings = array()) {
 
         $settings["helpers"]  = array_merge([
@@ -28,6 +26,31 @@ class App extends \Lime\App {
         $this->viewvars["docs_root"]  = $this["docs_root"];
 
         $this->registry["modules"] = new \ArrayObject(array());
+
+        // renderer service
+        $this->service('renderer', function() {
+
+            $renderer = new \Lexy();
+
+            //register app helper functions
+            $renderer->extend(function($content){
+
+                $content = preg_replace('/(\s*)@base\((.+?)\)/'   , '$1<?php $app->base($2); ?>', $content);
+                $content = preg_replace('/(\s*)@route\((.+?)\)/'  , '$1<?php $app->route($2); ?>', $content);
+                $content = preg_replace('/(\s*)@scripts\((.+?)\)/', '$1<?php echo $app->assets($2); ?>', $content);
+                $content = preg_replace('/(\s*)@render\((.+?)\)/' , '$1<?php echo $app->view($2); ?>', $content);
+                $content = preg_replace('/(\s*)@trigger\((.+?)\)/', '$1<?php $app->trigger($2); ?>', $content);
+                $content = preg_replace('/(\s*)@lang\((.+?)\)/'   , '$1<?php echo $app("i18n")->get($2); ?>', $content);
+
+                $content = preg_replace('/(\s*)@start\((.+?)\)/'   , '$1<?php $app->start($2); ?>', $content);
+                $content = preg_replace('/(\s*)@end\((.+?)\)/'     , '$1<?php $app->end($2); ?>', $content);
+                $content = preg_replace('/(\s*)@block\((.+?)\)/'   , '$1<?php $app->block($2); ?>', $content);
+
+                return $content;
+            });
+
+            return $renderer;
+        });
 
         $this("session")->init();
     }
@@ -93,9 +116,9 @@ class App extends \Lime\App {
     * @param  Array  $slots   Passed variables
     * @return String               Rendered view
     */
-    public function view($template, $slots = array()) {
+    public function view($template, $slots = []) {
 
-        $renderer     = $this->renderer();
+        $renderer     = $this->renderer;
         $olayout      = $this->layout;
 
         $slots         = array_merge($this->viewvars, $slots);
@@ -119,14 +142,7 @@ class App extends \Lime\App {
             return "Couldn't resolve {$template}.";
         }
 
-        $cachedfile = $this->get_cached_view($template);
-
-        if ($cachedfile) {
-            $output = $this->render($cachedfile, $slots);
-        } else {
-            $output = $renderer->file($template, $slots);
-        }
-
+        $output = $renderer->file($template, $slots);
 
         if ($layout) {
 
@@ -140,13 +156,7 @@ class App extends \Lime\App {
 
             $slots["content_for_layout"] = $output;
 
-            $cachedfile = $this->get_cached_view($layout);
-
-            if($cachedfile) {
-                $output = $this->render($cachedfile, $slots);
-            } else {
-                $output = $renderer->file($layout, $slots);
-            }
+            $output = $renderer->file($layout, $slots);
         }
 
         $this->layout = $olayout;
@@ -154,77 +164,10 @@ class App extends \Lime\App {
         return $output;
     }
 
-    public function renderer() {
-
-        if (!$this->view_renderer)  {
-
-            $this->view_renderer = new \Lexy();
-
-            //register app helper functions
-            $this->view_renderer->extend(function($content){
-
-                $content = preg_replace('/(\s*)@base\((.+?)\)/'   , '$1<?php $app->base($2); ?>', $content);
-                $content = preg_replace('/(\s*)@route\((.+?)\)/'  , '$1<?php $app->route($2); ?>', $content);
-                $content = preg_replace('/(\s*)@scripts\((.+?)\)/', '$1<?php echo $app->assets($2); ?>', $content);
-                $content = preg_replace('/(\s*)@render\((.+?)\)/' , '$1<?php echo $app->view($2); ?>', $content);
-                $content = preg_replace('/(\s*)@trigger\((.+?)\)/', '$1<?php $app->trigger($2); ?>', $content);
-                $content = preg_replace('/(\s*)@lang\((.+?)\)/'   , '$1<?php echo $app("i18n")->get($2); ?>', $content);
-
-                $content = preg_replace('/(\s*)@start\((.+?)\)/'   , '$1<?php $app->start($2); ?>', $content);
-                $content = preg_replace('/(\s*)@end\((.+?)\)/'     , '$1<?php $app->end($2); ?>', $content);
-                $content = preg_replace('/(\s*)@block\((.+?)\)/'   , '$1<?php $app->block($2); ?>', $content);
-
-                return $content;
-            });
-        }
-
-        return $this->view_renderer;
-    }
-
-    protected function get_cached_view($template) {
-
-        $cachefile   = md5($template).'.view.php';
-        $cachefolder = $this->path("tmp:");
-
-        if (!$cachefolder) {
-            return false;
-        }
-
-        $cachedfile  = $this->path("tmp:{$cachefile}");
-
-        if (!$cachedfile) {
-            $cachedfile = $this->cache_template($template);
-        }
-
-        if ($cachedfile) {
-
-            $mtime = filemtime($template);
-
-            if(filemtime($cachedfile)!=$mtime) {
-                $cachedfile = $this->cache_template($template, $mtime);
-            }
-
-            return $cachedfile;
-        }
-
-        return false;
-    }
-
-    protected function cache_template($file, $filemtime = null) {
-
-        if (!$filemtime){
-            $filemtime = filemtime($file);
-        }
-
-        $cachefile = md5($file).'.view.php';
-
-        if (file_put_contents($this->path("tmp:").$cachefile, $this->renderer()->parse(file_get_contents($file), false, $file))){
-            $cachedfile = $this->path("tmp:{$cachefile}");
-            touch($cachedfile,  $filemtime);
-
-            return $cachedfile;
-        }
-
-        return false;
+    /**
+     * Outputs view content result
+     */
+    public function renderView($template, $slots = []) {
+        echo $this->view($template, $slots);
     }
 }

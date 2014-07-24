@@ -8,6 +8,8 @@
  */
 class Lexy {
 
+    protected $cachePath = false;
+
     protected $srcinfo;
 
     protected $compilers = array(
@@ -17,7 +19,8 @@ class Lexy {
         'default_structures',
         'else',
         'unless',
-        'unescape_echos'
+        'unescape_echos',
+        'php_tags'
     );
 
     protected $extensions = array();
@@ -72,6 +75,15 @@ class Lexy {
     }
 
     /**
+     * [setcachePath description]
+     *
+     * @param  [type]  $path    [description]
+     */
+    public function setCachePath($path){
+        $this->cachePath = is_string($path) ? rtrim($path, "/\\") : $path;
+    }
+
+    /**
      * [execute description]
      * @param  [type]  $content [description]
      * @param  array   $params  [description]
@@ -101,7 +113,60 @@ class Lexy {
      */
     public function file($file, $params = array(), $sandbox=false) {
 
+        if ($this->cachePath) {
+
+            $cachedfile = $this->get_cached_file($file, $sandbox);
+
+            if ($cachedfile) {
+
+                ob_start();
+
+                lexy_include_with_params($cachedfile, $params, $file);
+
+                $output = ob_get_clean();
+
+                return $output;
+            }
+        }
+
+
         return $this->execute(file_get_contents($file), $params, $sandbox, $file);
+    }
+
+    protected function get_cached_file($file, $sandbox) {
+
+        $cachedfile = $this->cachePath.'/'.md5($file).'.lexy.php';
+
+        if (!file_exists($cachedfile)) {
+            $cachedfile = $this->cache_file($file, $cachedfile, null, $sandbox);
+        }
+
+        if ($cachedfile) {
+
+            $mtime = filemtime($file);
+
+            if(filemtime($cachedfile)!=$mtime) {
+                $cachedfile = $this->cache_file($file, $cachedfile, $mtime, $sandbox);
+            }
+
+            return $cachedfile;
+        }
+
+        return false;
+    }
+
+    protected function cache_file($file, $cachedfile, $filemtime = null, $sandbox = false) {
+
+        if (!$filemtime){
+            $filemtime = filemtime($file);
+        }
+
+        if (file_put_contents($cachedfile, $this->parse(file_get_contents($file), $sandbox, $file))){
+            touch($cachedfile,  $filemtime);
+            return $cachedfile;
+        }
+
+        return false;
     }
 
     /**
@@ -229,7 +294,7 @@ class Lexy {
 
         ob_start();
 
-        $check = eval('?>'.'<?php if(0): ?>'.$code.'<?php endif; ?><?php ');
+        $check = function_exists('eval') ? eval('?>'.'<?php if(0): ?>'.$code.'<?php endif; ?><?php ') : true;
 
         if ($check === false) {
             $output = ob_get_clean();
@@ -331,6 +396,17 @@ class Lexy {
     }
 
     /**
+     * Rewrites Lexi's php tags.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    protected function compile_php_tags($value) {
+
+        return str_replace(array('{%', '%}'), array('<?php', '?>'), $value);
+    }
+
+    /**
      * Execute user defined compilers.
      *
      * @param  string  $value
@@ -349,5 +425,12 @@ class Lexy {
 
 function lexy_eval_with_params($__lexyobj, $__lexycontent, $__lexyparams, $__lexysandbox, $__lexysrcinfo) {
     extract($__lexyparams);
+    $__FILE = $__lexysrcinfo;
     eval('?>'.$__lexyobj->parse($__lexycontent, $__lexysandbox, $__lexysrcinfo).'<?php ');
+}
+
+function lexy_include_with_params($__incfile, $__lexyparams, $__lexysrcinfo) {
+    extract($__lexyparams);
+    $__FILE = $__lexysrcinfo;
+    include($__incfile);
 }

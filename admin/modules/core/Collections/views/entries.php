@@ -1,14 +1,16 @@
-{{ $app->assets(['collections:assets/collections.js','collections:assets/js/entries.js'], $app['cockpit/version']) }}
+@start('header')
 
-<style>
-    td .uk-grid+.uk-grid { margin-top: 5px; }
-</style>
+    {{ $app->assets(['collections:assets/collections.js','collections:assets/js/entries.js'], $app['cockpit/version']) }}
 
-<script>
+    <style>
+        td .uk-grid+.uk-grid { margin-top: 5px; }
+    </style>
 
-    var COLLECTION = {{ json_encode($collection) }};
+    <script>
+        var COLLECTION = {{ json_encode($collection) }};
+    </script>
 
-</script>
+@end('header')
 
 
 <div data-ng-controller="entries" ng-cloak>
@@ -77,7 +79,7 @@
                             <td>
                                 <div class="uk-grid uk-grid-preserve uk-text-small" data-ng-repeat="field in fields">
                                     <div class="uk-width-medium-1-5">
-                                        <strong>@@ field.name @@</strong>
+                                        <strong>@@ (field.label || field.name) @@</strong>
                                     </div>
                                     <div class="uk-width-medium-4-5">
                                         <a class="uk-link-muted" href="@route('/collections/entry/'.$collection["_id"])/@@ entry._id @@">@@ entry[field.name] @@</a>

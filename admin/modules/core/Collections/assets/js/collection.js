@@ -25,11 +25,19 @@
         }
 
         $scope.collections = [];
+        $scope.groups      = [];
 
+        // get collections
         $http.post(App.route("/api/collections/find"), {}).success(function(data){
-
             $scope.collections = data;
         });
+
+        // get groups
+        $http.post(App.route("/api/collections/getGroups"), {}).success(function(groups){
+
+            $scope.groups = groups;
+
+        }).error(App.module.callbacks.error.http);
 
         $scope.addfield = function(){
 
@@ -55,6 +63,10 @@
 
         };
 
+        $scope.toggleOptions = function(index) {
+            $("#options-field-"+index).toggleClass('uk-hidden');
+        };
+
         $scope.save = function() {
 
             var collection = angular.copy($scope.collection);
@@ -62,8 +74,8 @@
             $http.post(App.route("/api/collections/save"), {"collection": collection}).success(function(data){
 
                 if(data && Object.keys(data).length) {
-                    $scope.collection = data;
-                    App.notify(App.i18n.get("Collection saved!"));
+                    $scope.collection._id = data._id;
+                    App.notify(App.i18n.get("Collection saved!"), "success");
                 }
 
             }).error(App.module.callbacks.error.http);
@@ -91,6 +103,17 @@
 
         });
 
+
+        // bind clobal command + save
+        Mousetrap.bindGlobal(['command+s', 'ctrl+s'], function(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            } else {
+                e.returnValue = false; // ie
+            }
+            $scope.save();
+            return false;
+        });
 
     });
 

@@ -1,4 +1,8 @@
-{{ $app->assets(['forms:assets/forms.js','forms:assets/js/index.js'], $app['cockpit/version']) }}
+@start('header')
+
+    {{ $app->assets(['forms:assets/forms.js','forms:assets/js/index.js'], $app['cockpit/version']) }}
+
+@end('header')
 
 <div data-ng-controller="forms" ng-cloak>
 
@@ -35,7 +39,7 @@
                 <a class="uk-link-muted" href="@route('/forms/entries')/@@ form._id @@"><strong>@@ form.name @@</strong></a>
 
                 <div class="uk-margin">
-                    <span class="uk-badge app-badge" title="Last update">@@ form.modified |fmtdate:'d M, Y H:i' @@</span>
+                    <span class="uk-badge app-badge">@@ form.count @@ @lang('Entries')</span>
                 </div>
 
                 <div class="app-panel-box docked-bottom">
@@ -56,7 +60,8 @@
             <thead>
                 <tr>
                     <th width="10"><input class="js-select-all" type="checkbox"></th>
-                    <th>@lang('Form')</th>
+                    <th width="60%">@lang('Form')</th>
+                    <th width="10%">@lang('Entries')</th>
                     <th></th>
                 </tr>
             </thead>
@@ -66,10 +71,14 @@
                     <td>
                         <a href="@route('/forms/form')/@@ form._id @@">@@ form.name @@</a>
                     </td>
+                    <td>@@ form.count @@</td>
                     <td align="right">
-                        @hasaccess?("Forms", 'manage.forms')
-                        <a class="uk-text-danger" data-ng-click="remove($index, form)" href="#" title="@lang('Delete form')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-minus-circle js-ignore-select"></i></a>
-                        @end
+                        <ul class="uk-subnav uk-subnav-line">
+                            <li><a href="@route('/forms/entries')/@@ form._id @@" title="@lang('Show entries')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-bars"></i></a></li>
+                            @hasaccess?("Forms", 'manage.forms')
+                            <li><a class="uk-text-danger" data-ng-click="remove($index, form)" href="#" title="@lang('Delete form')" data-uk-tooltip="{pos:'bottom'}"><i class="uk-icon-minus-circle js-ignore-select"></i></a></li>
+                            @end
+                        </ul>
                     </td>
                 </tr>
             </tbody>

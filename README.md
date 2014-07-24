@@ -41,19 +41,19 @@ Below we've shown some examples of content locations and their corresponing URL'
             <th align="left">URL</th>
         </tr>
         <tr>
-            <td>content/index.php</td>
+            <td>site/pages/index.php</td>
             <td>/</td>
         </tr>
         <tr>
-            <td>content/sub.php</td>
+            <td>site/pages/sub.php</td>
             <td>/sub</td>
         </tr>
         <tr>
-            <td>content/sub/page.php</td>
+            <td>site/pages/sub/page.php</td>
             <td>/sub/page</td>
         </tr>
         <tr>
-            <td>content/a/very/long/url.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>site/pages/a/very/long/url.php&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td>/a/very/long/url</td>
         </tr>
     </tbody>

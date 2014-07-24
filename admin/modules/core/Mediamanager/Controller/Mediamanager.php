@@ -78,7 +78,7 @@ class Mediamanager extends \Cockpit\Controller {
                         "path" => trim($path.'/'.$file->getFilename(), '/'),
                         "url"  => $this->app->pathToUrl($file->getPathname()),
                         "size" => $file->isDir() ? "" : $this->app->helper("utils")->formatSize($file->getSize()),
-                        "lastmodified" => $file->isDir() ? "" : date("d.m.y H:m", $file->getMTime()),
+                        "lastmodified" => $file->isDir() ? "" : date("d.m.y H:i", $file->getMTime()),
                     );
                 }
             }
@@ -93,17 +93,24 @@ class Mediamanager extends \Cockpit\Controller {
         $path       = $this->param('path', false);
         $targetpath = $this->root.'/'.trim($path, '/');
         $uploaded   = [];
+        $failed     = [];
 
 
         if (isset($files['name']) && $path && file_exists($targetpath)) {
             for ($i = 0; $i < count($files['name']); $i++) {
-                if (!$files['error'][$i] && move_uploaded_file($files['tmp_name'][$i], $targetpath.'/'.$files['name'][$i])) {
+
+                // clean filename
+                $clean = preg_replace('/[^a-zA-Z0-9-_\.]/','', str_replace(' ', '-', $files['name'][$i]));
+
+                if (!$files['error'][$i] && move_uploaded_file($files['tmp_name'][$i], $targetpath.'/'.$clean)) {
                     $uploaded[] = $files['name'][$i];
+                } else {
+                    $failed[] = $files['name'][$i];
                 }
             }
         }
 
-        return json_encode($uploaded);
+        return json_encode(['uploaded' => $uploaded, 'failed' => $failed]);
     }
 
     protected function createfolder() {

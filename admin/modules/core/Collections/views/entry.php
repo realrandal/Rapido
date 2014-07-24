@@ -1,35 +1,39 @@
-{{ $app->assets(['collections:assets/collections.js','collections:assets/js/entry.js'], $app['cockpit/version']) }}
+@start('header')
 
-{{ $app->assets(['assets:vendor/uikit/js/addons/timepicker.min.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/uikit/js/addons/datepicker.min.js'], $app['cockpit/version']) }}
+    {{ $app->assets(['collections:assets/collections.js','collections:assets/js/entry.js'], $app['cockpit/version']) }}
 
-{{ $app->assets(['assets:vendor/codemirror/codemirror.js','assets:vendor/codemirror/codemirror.css','assets:vendor/codemirror/pastel-on-dark.css'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:angular/directives/codearea.js'], $app['cockpit/version']) }}
+    {{ $app->assets(['assets:vendor/uikit/js/addons/timepicker.min.js'], $app['cockpit/version']) }}
+    {{ $app->assets(['assets:vendor/uikit/js/addons/datepicker.min.js'], $app['cockpit/version']) }}
 
-{{ $app->assets(['assets:vendor/tinymce/tinymce.min.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/tinymce/langs/'.$app("i18n")->locale.'.js'], $app['cockpit/version']) }}
+    {{ $app->assets(['assets:vendor/codemirror/codemirror.js','assets:vendor/codemirror/codemirror.css','assets:vendor/codemirror/pastel-on-dark.css'], $app['cockpit/version']) }}
+    {{ $app->assets(['assets:angular/directives/codearea.js'], $app['cockpit/version']) }}
 
-{{ $app->assets(['assets:vendor/uikit/js/addons/htmleditor.min.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:vendor/marked.js'], $app['cockpit/version']) }}
+    {{ $app->assets(['assets:vendor/tinymce/tinymce.min.js'], $app['cockpit/version']) }}
+    {{ $app->assets(['assets:vendor/tinymce/langs/'.$app("i18n")->locale.'.js'], $app['cockpit/version']) }}
+
+    {{ $app->assets(['assets:vendor/uikit/js/addons/htmleditor.min.js'], $app['cockpit/version']) }}
+    {{ $app->assets(['assets:vendor/marked.js'], $app['cockpit/version']) }}
 
 
-{{ $app->assets(['assets:angular/directives/wysiwyg.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:angular/directives/htmleditor.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:angular/directives/gallery.js'], $app['cockpit/version']) }}
-{{ $app->assets(['assets:angular/directives/tags.js'], $app['cockpit/version']) }}
+    {{ $app->assets(['assets:angular/directives/wysiwyg.js'], $app['cockpit/version']) }}
+    {{ $app->assets(['assets:angular/directives/htmleditor.js'], $app['cockpit/version']) }}
+    {{ $app->assets(['assets:angular/directives/gallery.js'], $app['cockpit/version']) }}
+    {{ $app->assets(['assets:angular/directives/tags.js'], $app['cockpit/version']) }}
 
-{{ $app->assets(['mediamanager:assets/pathpicker.directive.js'], $app['cockpit/version']) }}
-{{ $app->assets(['regions:assets/regionpicker.directive.js'], $app['cockpit/version']) }}
-{{ $app->assets(['collections:assets/linkcollection.directive.js'], $app['cockpit/version']) }}
+    {{ $app->assets(['mediamanager:assets/pathpicker.directive.js'], $app['cockpit/version']) }}
+    {{ $app->assets(['regions:assets/regionpicker.directive.js'], $app['cockpit/version']) }}
+    {{ $app->assets(['collections:assets/linkcollection.directive.js'], $app['cockpit/version']) }}
 
-<style>
-    textarea { min-height: 150px; }
-</style>
+    <style>
+        textarea { min-height: 150px; }
+    </style>
 
-<script>
- var COLLECTION = {{ json_encode($collection) }},
-     COLLECTION_ENTRY = {{ json_encode($entry) }};
-</script>
+    <script>
+     var COLLECTION = {{ json_encode($collection) }},
+         COLLECTION_ENTRY = {{ json_encode($entry) }};
+    </script>
+
+@end('header')
 
 <div data-ng-controller="entry" ng-cloak>
 
@@ -82,8 +86,15 @@
 
                     <div class="uk-form-row" data-ng-repeat="field in fieldsInArea('main')" data-ng-switch="field.type">
 
-                        <label class="uk-text-small">@@ field.name | uppercase @@ <span ng-show="field.required">*</span></label>
+                        <label class="uk-text-small">@@ (field.label || field.name) | uppercase @@ <span ng-show="field.required">*</span></label>
                         <div class="uk-text-small uk-text-danger uk-float-right uk-animation-slide-top" data-ng-if="field.error">@@ field.error @@</div>
+
+                        <div data-ng-switch-when="text">
+                            <input class="uk-width-1-1 uk-form-large" type="text" data-ng-class="{'uk-form-danger':field.error}" data-ng-model="entry[field.name]">
+                            <div class="uk-margin-top" ng-if="field.slug">
+                                <input class="uk-width-1-1 uk-form-blank uk-text-muted" type="text" data-ng-model="entry[field.name+'_slug']" app-slug="entry[field.name]" placeholder="@lang('Slug...')" title="@@ (field.label || field.name) @@ slug" data-uk-tooltip="{pos:'left'}">
+                            </div>
+                        </div>
 
                         <div data-ng-switch-when="html">
                             <htmleditor data-ng-model="entry[field.name]"></htmleditor>
@@ -125,7 +136,7 @@
             <div class="uk-width-medium-1-4">
                     <div class="uk-form-row" data-ng-repeat="field in fieldsInArea('side')" data-ng-switch="field.type">
 
-                        <label class="uk-text-small">@@ field.name | uppercase @@ <span ng-show="field.required">*</span></label>
+                        <label class="uk-text-small">@@ (field.label || field.name) | uppercase @@ <span ng-show="field.required">*</span></label>
                         <div class="uk-text-small uk-text-danger uk-float-right uk-animation-slide-top" data-ng-if="field.error">@@ field.error @@</div>
 
                         <div data-ng-switch-when="select">
@@ -150,7 +161,10 @@
                         </div>
 
                         <div data-ng-switch-when="time">
-                            <input class="uk-width-1-1 uk-form-large" type="text" data-ng-class="{'uk-form-danger':field.error}" data-uk-timepicker data-ng-model="entry[field.name]">
+                            <div class="uk-form-icon uk-width-1-1" data-uk-timepicker>
+                                <i class="uk-icon-clock-o"></i>
+                                <input class="uk-width-1-1 uk-form-large" type="text" data-ng-class="{'uk-form-danger':field.error}" data-ng-model="entry[field.name]">
+                            </div>
                         </div>
 
                         <div data-ng-switch-when="region">
@@ -171,7 +185,5 @@
         </div>
 
     </form>
-
-
 
 </div>

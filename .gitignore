@@ -6,22 +6,4 @@
 .settings
 .idea
 
-/admin/storage/backups/*.zip
-/admin/storage/cache/assets/*.js
-/admin/storage/cache/assets/*.css
-/admin/storage/cache/thumbs/*.jpg
-/admin/storage/cache/thumbs/*.png
-/admin/storage/cache/thumbs/*.gif
-/admin/storage/cache/tmp/*
-/admin/storage/data/*.sqlite
-/admin/storage/uploads/*
-/admin/custom/*
-
-/storage/cache/assets/*.js
-/storage/cache/assets/*.css
-/storage/cache/thumbs/*.jpg
-/storage/cache/thumbs/*.png
-/storage/cache/thumbs/*.gif
-/storage/cache/tmp/*
-/storage/data/*.sqlite
-/storage/uploads/*
+/storage/*
