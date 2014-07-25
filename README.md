@@ -82,7 +82,7 @@ These values will be contained in the  <code>$meta</code> variable in themes/vie
 
 <hr/>
 
-### Themeing
+### Theming
 
 You can create themes for your Rapido installation in the "themes" folder. Check out the default theme for an example of a theme. Rapido uses Lexy for it's templating engine (inspired by Blade). You can select your theme by setting the <code>theme</code> variable in config.php to your theme folder.
 
